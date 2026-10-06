@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ignacio — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+/* ─── look & feel ────────────────────────────────────────────── */
+:root{
+  --scene-max-width: 1280px;     /* how wide the picture may get on desktop */
+  --popup-max-width: 760px;      /* width of the project window             */
+  --accent: #FF3B30;             /* hover glow (matches the red doodles)    */
+  color-scheme: light dark;
+  --bg: #5A6670;  --ink: #F2F2F0;  --muted: #C2C9CF;
+  --panel: #FFFFFF; --panel-ink: #1B1F2A; --panel-muted:#6A6F7D; --line: #E0DCD2; --dim: rgba(20,22,30,.66);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#2F363D; --panel:#20262E; --panel-ink:#EDE9DF; --panel-muted:#9AA0AF; --line:#39414B; --dim:rgba(5,7,14,.74); }
+}
+:root[data-theme="dark"]{ --bg:#2F363D; --panel:#20262E; --panel-ink:#EDE9DF; --panel-muted:#9AA0AF; --line:#39414B; --dim:rgba(5,7,14,.74); }
+
+*{box-sizing:border-box}
+:root{ padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px); }
+html{ scroll-padding-top: env(safe-area-inset-top,0px); }
+html,body{ margin:0; min-height:100%; }
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Outfit","Segoe UI",system-ui,-apple-system,sans-serif; font-weight:300; line-height:1.55;
+  display:flex; flex-direction:column; align-items:center;
+  padding: clamp(12px,3vw,40px) clamp(10px,3vw,32px);
+}
+body.locked{ overflow:hidden; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+
+/* ─── scene ───────────────────────────────────────────────────── */
+.scene{
+  position:relative; flex:none; width:100%; max-width:var(--scene-max-width);
+  aspect-ratio:16/10; border-radius:14px; overflow:hidden; background:#4d5962;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.6); user-select:none;
+}
+.scene img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+.scene img.frame{ visibility:hidden; }
+.scene img.frame.show{ visibility:visible; }
+
+.hotspot{
+  position:absolute; padding:0; margin:0; border:0; background:transparent; cursor:pointer;
+  border-radius:8px; color:#fff; font:inherit; transform-origin:center; outline-offset:4px;
+  display:flex; align-items:flex-end; justify-content:center;
+}
+.hotspot:focus-visible{ outline:2px solid var(--accent); }
+.hotspot::before{ content:""; position:absolute; inset:0; border-radius:8px; transition:box-shadow .18s ease; }
+.hotspot:hover::before, .hotspot:focus-visible::before{
+  box-shadow: 0 0 30px 3px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 0 0 2px var(--accent);
+}
+.hotspot span{
+  position:relative; margin-bottom:8px; padding:4px 10px; border-radius:999px; background:rgba(0,0,0,.6);
+  font-size:13px; font-weight:500; letter-spacing:.02em; white-space:nowrap;
+  opacity:0; transform:translateY(4px); transition:opacity .18s, transform .18s;
+}
+.hotspot:hover span, .hotspot:focus-visible span{ opacity:1; transform:none; }
+.hint{ margin-top:12px; font-size:14px; color:var(--muted); }
+.hint kbd{ font:inherit; padding:1px 6px; border:1px solid var(--muted); border-radius:4px; }
+
+/* ─── project window ──────────────────────────────────────────── */
+.backdrop{ position:fixed; inset:0; background:var(--dim); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; }
+.backdrop.open{ display:flex; }
+.panel{ position:relative; width:100%; max-width:var(--popup-max-width); max-height:100%; background:var(--panel); color:var(--panel-ink);
+  border-radius:16px; overflow-y:auto; overscroll-behavior:contain; box-shadow:0 40px 80px -20px rgba(0,0,0,.6); animation:rise .22s ease-out; }
+@keyframes rise{ from{ transform:translateY(18px); opacity:0 } to{ transform:none; opacity:1 } }
+.panel .close{ position:sticky; top:12px; float:right; margin:12px 12px 0 0; width:40px; height:40px; border-radius:50%; border:0; cursor:pointer;
+  background:var(--panel-ink); color:var(--panel); font-size:22px; line-height:40px; text-align:center; z-index:2; }
+.panel .inner{ padding:28px clamp(20px,5vw,48px) 48px; clear:both; }
+.panel h2{ margin:0 0 4px; font-size:clamp(28px,4vw,40px); font-weight:700; letter-spacing:-.02em; line-height:1.05; }
+.panel .tag{ margin:0 0 22px; color:var(--panel-muted); font-size:16px; }
+.panel .project{ border-top:1px solid var(--line); padding:22px 0; }
+.panel .project:last-child{ border-bottom:1px solid var(--line); }
+.panel .row{ display:grid; grid-template-columns:1fr minmax(140px,36%); gap:18px 24px; align-items:start; }
+@media (max-width:520px){ .panel .row{ grid-template-columns:1fr; } .panel .thumb{ order:-1; } }
+.panel h3{ margin:0 0 6px; font-size:22px; font-weight:500; line-height:1.15; }
+.panel .summary{ margin:0 0 12px; font-size:16px; color:var(--panel-muted); max-width:52ch; }
+.panel .more{ font:inherit; font-weight:500; font-size:14px; padding:6px 14px; border-radius:999px; cursor:pointer; border:1px solid var(--panel-ink); background:transparent; color:var(--panel-ink); }
+.panel .more:hover, .panel .project.open .more{ background:var(--panel-ink); color:var(--panel); }
+.panel .thumb img, .panel .thumb .video, .panel .thumb .placeholder{ aspect-ratio:16/9; width:100%; object-fit:cover; border-radius:8px; display:block; }
+.panel .full{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
+.panel .project.open .full{ grid-template-rows:1fr; }
+.panel .full-inner{ overflow:hidden; min-height:0; }
+.panel .project.open .full-inner{ padding-top:18px; }
+.panel p{ margin:0 0 14px; max-width:62ch; font-size:17px; }
+.panel .meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px 20px; margin:0 0 18px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--panel-ink) 6%,transparent); font-size:15px; }
+.panel .meta b{ display:block; font-weight:500; color:var(--panel-muted); font-size:13px; }
+.panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
+.panel .video{ aspect-ratio:16/9; overflow:hidden; }
+.panel .video iframe{ width:100%; height:100%; border:0; }
+.panel .placeholder{ aspect-ratio:16/9; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  background:color-mix(in srgb,var(--panel-ink) 8%,transparent); color:var(--panel-muted); font-size:14px; border:1px dashed var(--line); }
+.panel .placeholder.video::before{ content:"▷"; font-size:40px; line-height:1; color:var(--accent); }
+.panel .links{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.panel .links a{ padding:10px 16px; border-radius:999px; border:1px solid var(--panel-ink); color:var(--panel-ink); text-decoration:none; font-weight:500; font-size:15px; }
+.panel .links a:hover{ background:var(--panel-ink); color:var(--panel); }
+@media (prefers-reduced-motion:reduce){ .panel{ animation:none } .scene img,.hotspot::before,.hotspot span,.panel .full{ transition:none } }
+
+/* ─── edit mode (press E) ─────────────────────────────────────── */
+body.editing .hotspot{ cursor:move; }
+body.editing .hotspot::before{ box-shadow:inset 0 0 0 2px var(--accent), 0 0 0 1px rgba(0,0,0,.5); background:color-mix(in srgb,var(--accent) 16%,transparent); }
+body.editing .hotspot.selected::before{ background:color-mix(in srgb,var(--accent) 30%,transparent); }
+body.editing .hotspot span{ opacity:1; transform:none; }
+.handle, .rot{ display:none; position:absolute; }
+.handle{ right:-7px; bottom:-7px; width:16px; height:16px; border-radius:3px; background:var(--accent); cursor:nwse-resize; }
+.rot{ left:50%; top:-34px; width:18px; height:18px; margin-left:-9px; border-radius:50%; background:#fff; border:3px solid var(--accent); cursor:grab; }
+.rot::after{ content:""; position:absolute; left:50%; top:100%; width:2px; height:16px; margin-left:-1px; background:var(--accent); }
+body.editing .handle, body.editing .rot{ display:block; }
+.editbar{ display:none; width:100%; max-width:var(--scene-max-width); margin-top:16px; padding:14px 16px; background:var(--panel); color:var(--panel-ink); border:1px solid var(--line); border-radius:12px; font-size:15px; }
+body.editing .editbar{ display:block; }
+.editbar table{ width:100%; border-collapse:collapse; margin:10px 0; font-size:14px; }
+.editbar th, .editbar td{ text-align:left; padding:5px 8px 5px 0; }
+.editbar th{ font-weight:500; color:var(--panel-muted); }
+.editbar input{ width:5.5em; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:transparent; color:inherit; }
+.editbar tr.selected td{ background:color-mix(in srgb,var(--accent) 10%,transparent); }
+.editbar pre{ margin:8px 0 10px; padding:12px; background:color-mix(in srgb,var(--panel-ink) 6%,transparent); border-radius:8px; overflow-x:auto; font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace; }
+.editbar button{ font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:transparent; color:inherit; cursor:pointer; }
+.editbar button:hover{ background:color-mix(in srgb,var(--panel-ink) 8%,transparent); }
+.editbar .keys{ color:var(--panel-muted); font-size:13px; margin-top:6px; }
+.editbar kbd{ font:inherit; padding:0 5px; border:1px solid var(--line); border-radius:4px; }
+</style>
+</head>
+<body>
+<h1 class="sr-only">Ignacio — Portfolio</h1>
+
+<div class="scene" id="scene" aria-label="Ignacio at his desk">
+  <img id="bg" alt="">
+  <!-- animated layers are added here by the script -->
+</div>
+<p class="hint">Hover something on the desk, click to open it. Press <kbd>E</kbd> to edit the hotspots.</p>
+
+<div class="editbar" id="editbar">
+  <strong>Edit mode</strong> — drag a hotspot to move it, the square corner to resize, the round handle on top to rotate freely. Or type the numbers directly.
+  <div class="keys">Click a hotspot to select it, then: <kbd>←→↑↓</kbd> move 0.1% · <kbd>[</kbd> <kbd>]</kbd> rotate 0.5° · <kbd>Shift</kbd> + <kbd>[</kbd> <kbd>]</kbd> rotate 0.1° · mouse wheel over a hotspot rotates 1° (Shift: 0.1°). Press <kbd>E</kbd> to leave.</div>
+  <p style="margin:10px 0 0">Animation: change frame every <input type="number" id="frameSecs" step="0.1" min="0.05" style="width:5em;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:transparent;color:inherit"> seconds (live preview — put the number you like into <em>FRAME_SECONDS</em> in the file).</p>
+  <table id="edittable"></table>
+  Paste these lines over the <em>hotspots</em> list in the file:
+  <pre id="cssout"></pre>
+  <button id="copy">Copy values</button>
+</div>
+
+<div class="backdrop" id="backdrop">
+  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
+    <button class="close" id="close" aria-label="Close">×</button>
+    <div class="inner" id="inner"></div>
+  </section>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1. PICTURES — the desk stays fixed; everything else is a transparent
+   layer drawn on top. Each layer is a LIST of frames; the page cycles
+   through them in order (1 → 2 → 3 → 1 …) so it looks hand-animated.
+   ═══════════════════════════════════════════════════════════════ */
+const FRAME_SECONDS = 1;          // ← how often the frame changes (0.5 = twice a second)
+
+// Where the first-screen pictures live, and their file extension.
+// Files are named like your folder: "Background", "Left 1", "Left 2", "Midle 1", "Ignacio Portfolio 1" ...
+const IMG = "Portfolio Images/FirstScreen/";
+const EXT = ".webp";              // ← change to ".png" if you drop in your original PNGs (heavier page!)
+const frames = name => [1, 2, 3].map(n => `${IMG}${name} ${n}${EXT}`);   // "Left 1", "Left 2", "Left 3"
+
+const background = IMG + "Background.jpg";
+
+// Decoration layers: always visible, just cycling.
+const layers = {
+  title:      frames("Ignacio Portfolio"),
+  gameDesign: frames("Game Design"),
+};
+
+// The person: one list of frames per pose. "idle" = nothing hovered.
+const poses = {
+  idle:   frames("Midle"),
+  left:   frames("Left"),
+  center: frames("Midle"),
+  right:  frames("Right"),
+};
+// A layer can have any number of frames (1 = static). To use 4 frames, change [1, 2, 3] above
+// to [1, 2, 3, 4]. You can also write a list by hand: ["Portfolio Images/FirstScreen/plant.png"].
+
+/* ═══════════════════════════════════════════════════════════════
+   2. HOTSPOTS — one line per clickable thing on the desk.
+   left/top/width/height are % of the picture; rotate is in degrees.
+   pose = which cut-out shows on hover (left / center / right / idle).
+   Press E on the page to drag these and get new numbers.
+   ═══════════════════════════════════════════════════════════════ */
+const hotspots = [
+  { id: "writing", label: "Writing",     pose: "left",   left: 12,   top: 32.5, width: 23,   height: 25.5, rotate: -7 },
+  { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
+  { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   3. CONTENT — what each hotspot opens. kind: "projects" | "about" | "contact".
+   media items: {image:"media/x.jpg"} or {youtube:"VIDEO_ID"}; "" shows a placeholder.
+   ═══════════════════════════════════════════════════════════════ */
+function proj(n){ return {
+  title: `Project ${n}`,
+  summary: "Two short lines: what the game is and what you did on it. Enough to make someone press More.",
+  thumb: { youtube: "" },
+  meta: { Role: "Game designer", Engine: "Unity / C#", Team: "4 people", When: "2026" },
+  details: [
+    "The full story in two or three short paragraphs. What the game is, who it was for, how long it took.",
+    "The systems you designed, the problems you solved, and one decision you are proud of.",
+  ],
+  media: [ { image: "" }, { image: "" } ],
+}; }
+
+const content = {
+  // Project screenshots go in the matching folder, e.g. { image: "Portfolio Images/GameDesign/level-1.jpg" }
+  writing: { kind: "projects", title: "Writing",     intro: "Narrative design, dialogue and worldbuilding.", projects: [ proj(1), proj(2), proj(3) ] },
+  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ proj(1), proj(2), proj(3) ] },
+  threed:  { kind: "projects", title: "3D",          intro: "Models, environments and props.",               projects: [ proj(1), proj(2), proj(3) ] },
+  // Other kinds you can attach to a hotspot later:
+  // about:   { kind: "about",   title: "About me",   intro: "...", paragraphs: ["..."], media: [ { image: "" } ] },
+  // contact: { kind: "contact", title: "Contact me", intro: "...", email: "you@example.com",
+  //            links: [ { label: "LinkedIn", url: "" }, { label: "itch.io", url: "" }, { label: "GitHub", url: "" }, { label: "CV (PDF)", url: "" } ] },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MECHANICS — nothing below needs editing.
+   ═══════════════════════════════════════════════════════════════ */
+const scene = document.getElementById("scene");
+const backdrop = document.getElementById("backdrop"), panel = document.getElementById("panel"), inner = document.getElementById("inner");
+
+// --- build hotspots from the list ---
+const els = {};
+for (const h of hotspots){
+  const b = document.createElement("button");
+  b.className = "hotspot"; b.id = "hs-" + h.id; b.setAttribute("aria-haspopup","dialog");
+  b.innerHTML = `<span>${h.label}</span><i class="handle"></i><i class="rot"></i>`;
+  scene.appendChild(b); els[h.id] = b;
+  apply(h);
+}
+function apply(h){
+  const b = els[h.id];
+  b.style.left = h.left + "%"; b.style.top = h.top + "%";
+  b.style.width = h.width + "%"; b.style.height = h.height + "%";
+  b.style.transform = `rotate(${h.rotate}deg)`;
+}
+
+// --- animated layers ---
+document.getElementById("bg").src = background;
+const animated = [];                      // { frames:[img,...], pose:null|poseName }
+function addLayer(srcs, pose){
+  const imgs = srcs.map(src => { const i = document.createElement("img"); i.className = "frame"; i.src = src; i.alt = ""; scene.insertBefore(i, scene.querySelector(".hotspot")); return i; });
+  animated.push({ frames: imgs, pose: pose || null });
+}
+for (const name in layers) addLayer(layers[name]);
+for (const name in poses) addLayer(poses[name], name);
+
+let frame = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
+function render(){
+  for (const L of animated){
+    const visible = !L.pose || L.pose === currentPose;
+    L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === frame % L.frames.length));
+  }
+}
+function showPose(key){ if (!poses[key]) key = "idle"; if (key === currentPose) return; currentPose = key; render(); }
+function setFrameSeconds(sec){           // also callable from the browser console: setFrameSeconds(0.5)
+  frameSeconds = Math.max(0.05, Number(sec) || FRAME_SECONDS);
+  clearInterval(timer);
+  timer = setInterval(() => { frame = (frame + 1) % 60; render(); }, frameSeconds * 1000);
+  const f = document.getElementById("frameSecs"); if (f && document.activeElement !== f) f.value = frameSeconds;
+}
+render(); setFrameSeconds(FRAME_SECONDS);
+document.getElementById("frameSecs").addEventListener("input", e => { if (parseFloat(e.target.value) > 0) setFrameSeconds(e.target.value); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) clearInterval(timer); else setFrameSeconds(frameSeconds); });
+
+for (const h of hotspots){
+  const b = els[h.id];
+  b.addEventListener("pointerenter", () => { if (!editing) showPose(h.pose); });
+  b.addEventListener("pointerleave", () => { if (!editing) showPose("idle"); });
+  b.addEventListener("focus", () => showPose(h.pose));
+  b.addEventListener("blur", () => showPose("idle"));
+  b.addEventListener("click", () => { if (editing) select(h); else openWindow(h); });
+}
+
+// --- windows ---
+function mediaHTML(m, alt){
+  if (m.youtube !== undefined) return m.youtube
+    ? `<div class="video"><iframe src="https://www.youtube.com/embed/${m.youtube}" title="${alt} video" allowfullscreen loading="lazy"></iframe></div>`
+    : `<div class="placeholder video">Video</div>`;
+  return m.image ? `<img src="${m.image}" alt="${alt}" loading="lazy">` : `<div class="placeholder">Screenshot</div>`;
+}
+function projectsHTML(c){
+  return c.projects.map((p,i) => `
+    <article class="project">
+      <div class="row">
+        <div class="text">
+          <h3>${p.title}</h3>
+          <p class="summary">${p.summary}</p>
+          <button class="more" aria-expanded="false">More</button>
+        </div>
+        <div class="thumb">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
+      </div>
+      <div class="full"><div class="full-inner">
+        <div class="meta">${Object.entries(p.meta || {}).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>
+        ${(p.details || []).map(t => `<p>${t}</p>`).join("")}
+        <div class="media">${(p.media || []).map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>
+      </div></div>
+    </article>`).join("");
+}
+function aboutHTML(c){
+  return `${(c.paragraphs || []).map(t => `<p>${t}</p>`).join("")}<div class="media">${(c.media || []).map(m => mediaHTML(m, c.title)).join("")}</div>`;
+}
+function contactHTML(c){
+  const links = (c.links || []).filter(l => l.url).map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
+  return `<p><a href="mailto:${c.email}" style="color:inherit;font-weight:500">${c.email}</a></p><div class="links">${links}</div>`;
+}
+let lastFocus = null;
+function openWindow(h){
+  const c = content[h.id]; if (!c) return;
+  const body = c.kind === "projects" ? projectsHTML(c) : c.kind === "about" ? aboutHTML(c) : contactHTML(c);
+  inner.innerHTML = `<h2 id="ptitle">${c.title}</h2><p class="tag">${c.intro || ""}</p>${body}`;
+  inner.querySelectorAll(".more").forEach(b => b.addEventListener("click", () => {
+    const art = b.closest(".project"), open = art.classList.toggle("open");
+    b.setAttribute("aria-expanded", open); b.textContent = open ? "Less" : "More";
+    if (open) setTimeout(() => art.scrollIntoView({ behavior:"smooth", block:"start" }), 60);
+  }));
+  lastFocus = document.activeElement;
+  backdrop.classList.add("open"); document.body.classList.add("locked");
+  panel.scrollTop = 0; document.getElementById("close").focus();
+  showPose(h.pose);
+}
+function closeWindow(){
+  backdrop.classList.remove("open"); document.body.classList.remove("locked");
+  showPose("idle"); if (lastFocus) lastFocus.focus();
+}
+document.getElementById("close").addEventListener("click", closeWindow);
+backdrop.addEventListener("click", e => { if (e.target === backdrop) closeWindow(); });
+
+// --- edit mode ---
+let editing = false, selected = null;
+const r1 = v => Math.round(v * 10) / 10;
+function toggleEdit(){
+  editing = !editing; document.body.classList.toggle("editing", editing);
+  if (!editing && selected){ els[selected.id].classList.remove("selected"); selected = null; }
+  if (editing){ buildTable(); printOut(); }
+}
+function select(h){
+  if (selected) els[selected.id].classList.remove("selected");
+  selected = h; els[h.id].classList.add("selected"); refreshTable();
+}
+function changed(h){ apply(h); refreshTable(); printOut(); }
+
+document.addEventListener("keydown", e => {
+  const open = backdrop.classList.contains("open");
+  if (e.key === "Escape" && open) return closeWindow();
+  if ((e.key === "e" || e.key === "E") && !open && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT") return toggleEdit();
+  if (!editing || !selected || e.target.tagName === "INPUT") return;
+  const step = e.shiftKey ? 0.5 : 0.1, rstep = e.shiftKey ? 0.1 : 0.5;
+  const h = selected;
+  if (e.key === "ArrowLeft")  { h.left = r1(h.left - step); } else if (e.key === "ArrowRight") { h.left = r1(h.left + step); }
+  else if (e.key === "ArrowUp"){ h.top = r1(h.top - step); }  else if (e.key === "ArrowDown")  { h.top = r1(h.top + step); }
+  else if (e.key === "[")      { h.rotate = r1(h.rotate - rstep); } else if (e.key === "]") { h.rotate = r1(h.rotate + rstep); }
+  else return;
+  e.preventDefault(); changed(h);
+});
+
+for (const h of hotspots){
+  const b = els[h.id];
+  let mode = null, sx, sy, s0, a0;
+  const start = (e, m) => {
+    if (!editing) return;
+    e.preventDefault(); e.stopPropagation();
+    select(h); mode = m; sx = e.clientX; sy = e.clientY; s0 = { ...h };
+    if (m === "rotate"){ const r = b.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      a0 = Math.atan2(e.clientY - cy, e.clientX - cx) * 180/Math.PI - h.rotate; }
+    b.setPointerCapture(e.pointerId);
+  };
+  b.querySelector(".handle").addEventListener("pointerdown", e => start(e, "resize"));
+  b.querySelector(".rot").addEventListener("pointerdown", e => start(e, "rotate"));
+  b.addEventListener("pointerdown", e => start(e, "move"));
+  b.addEventListener("pointermove", e => {
+    if (!mode) return;
+    const s = scene.getBoundingClientRect();
+    const dx = (e.clientX - sx) / s.width * 100, dy = (e.clientY - sy) / s.height * 100;
+    if (mode === "move"){ h.left = r1(s0.left + dx); h.top = r1(s0.top + dy); }
+    else if (mode === "resize"){ h.width = r1(Math.max(2, s0.width + dx)); h.height = r1(Math.max(2, s0.height + dy)); }
+    else { const r = b.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      let a = Math.atan2(e.clientY - cy, e.clientX - cx) * 180/Math.PI - a0;
+      if (e.shiftKey) a = Math.round(a / 5) * 5;           // Shift snaps to 5°
+      h.rotate = r1(((a + 180) % 360 + 360) % 360 - 180); }
+    changed(h);
+  });
+  const stop = () => { mode = null; };
+  b.addEventListener("pointerup", stop); b.addEventListener("pointercancel", stop);
+  b.addEventListener("wheel", e => {
+    if (!editing) return; e.preventDefault();
+    h.rotate = r1(h.rotate + (e.deltaY > 0 ? 1 : -1) * (e.shiftKey ? 0.1 : 1)); select(h); changed(h);
+  }, { passive:false });
+}
+
+// --- numeric table ---
+const fields = ["left","top","width","height","rotate"];
+function buildTable(){
+  const t = document.getElementById("edittable");
+  t.innerHTML = `<tr><th>hotspot</th>${fields.map(f => `<th>${f}${f==="rotate" ? " (°)" : " (%)"}</th>`).join("")}</tr>` +
+    hotspots.map(h => `<tr data-id="${h.id}"><td>${h.label}</td>${fields.map(f => `<td><input type="number" step="0.1" data-id="${h.id}" data-f="${f}" value="${h[f]}"></td>`).join("")}</tr>`).join("");
+  t.querySelectorAll("input").forEach(i => i.addEventListener("input", () => {
+    const h = hotspots.find(x => x.id === i.dataset.id); const v = parseFloat(i.value);
+    if (!isNaN(v)){ h[i.dataset.f] = r1(v); apply(h); printOut(); }
+  }));
+  t.querySelectorAll("input").forEach(i => i.addEventListener("focus", () => select(hotspots.find(x => x.id === i.dataset.id))));
+}
+function refreshTable(){
+  document.querySelectorAll("#edittable tr[data-id]").forEach(tr => tr.classList.toggle("selected", selected && tr.dataset.id === selected.id));
+  document.querySelectorAll("#edittable input").forEach(i => { if (document.activeElement !== i){ const h = hotspots.find(x => x.id === i.dataset.id); i.value = h[i.dataset.f]; } });
+}
+function printOut(){
+  const pad = (s, n) => String(s).padEnd(n);
+  document.getElementById("cssout").textContent = "const hotspots = [\n" + hotspots.map(h =>
+    `  { id: ${pad(`"${h.id}",`,11)} label: ${pad(`"${h.label}",`,15)} pose: ${pad(`"${h.pose}",`,10)} left: ${pad(h.left+",",6)} top: ${pad(h.top+",",6)} width: ${pad(h.width+",",6)} height: ${pad(h.height+",",6)} rotate: ${h.rotate} },`
+  ).join("\n") + "\n];";
+}
+document.getElementById("copy").addEventListener("click", async () => {
+  const b = document.getElementById("copy");
+  try { await navigator.clipboard.writeText(document.getElementById("cssout").textContent); b.textContent = "Copied"; }
+  catch { b.textContent = "Select the text and copy it"; }
+  setTimeout(() => b.textContent = "Copy values", 1600);
+});
+</script>
+</body>
+</html>
