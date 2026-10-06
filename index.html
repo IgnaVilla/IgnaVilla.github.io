@@ -239,10 +239,29 @@ const sevenDays = {
   ],
 };
 
+const GB = "Portfolio Images/GameDesign/BreadyOrNot/";
+const breadyOrNot = {
+  title: "Bready or Not",
+  summary: "A chaotic multiplayer game: bake bread soldiers, punch your rivals and destroy their oven before they destroy yours.",
+  thumb: { image: encodeURI(GB + "BreadyOrNotImage1.webp") },
+  meta: { Engine: "Unity", Team: "6 students", Duration: "8 weeks", School: "Howest Digital Arts & Entertainment", "My role": "Part of the code, Unity implementation, effects, sound and design" },
+  details: [
+    "The goal is simple: destroy your rivals' oven before they destroy yours. Gather ingredients across the bakery and bake powerful bread soldiers to attack enemy ovens. Punch opponents to stun them and steal their ingredients, but stay sharp, because the clock is always ticking. Only one baker can rise to the top and become the next boss of the bakery!",
+    "Developed over eight weeks by a team of six students as a second-year project at Howest Digital Arts & Entertainment. I was in charge of part of the code, the implementation into Unity, effects, sound and design.",
+  ],
+  media: [
+    { youtube: "9p7CGt3zE5I" },
+    { image: encodeURI(GB + "BreadyOrNotImage2.webp") },
+    { image: encodeURI(GB + "BreadyOrNotImage3.webp") },
+    { image: encodeURI(GB + "BreadyOrNotImage4.webp") },
+  ],
+  links: [ { label: "itch.io", url: "https://ignavilla.itch.io" } ],
+};
+
 const content = {
   // Project screenshots go in the matching folder, e.g. { image: "Portfolio Images/GameDesign/level-1.jpg" }
   writing: { kind: "projects", title: "Writing",     intro: "Narrative design, dialogue and worldbuilding.", projects: [ proj(1), proj(2), proj(3) ] },
-  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ sevenDays, proj(2), proj(3) ] },
+  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ sevenDays, breadyOrNot, proj(3) ] },
   threed:  { kind: "projects", title: "3D",          intro: "Models, environments and props.",               projects: [ proj(1), proj(2), proj(3) ] },
   // Other kinds you can attach to a hotspot later:
   // about:   { kind: "about",   title: "About me",   intro: "...", paragraphs: ["..."], media: [ { image: "" } ] },
@@ -333,6 +352,7 @@ function projectsHTML(c){
         <div class="meta">${Object.entries(p.meta || {}).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>
         ${(p.details || []).map(t => `<p>${t}</p>`).join("")}
         <div class="media">${(p.media || []).map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>
+        ${(p.links || []).length ? `<div class="links">${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
       </div></div>
     </article>`).join("");
 }
