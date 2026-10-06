@@ -90,6 +90,12 @@ body.locked{ overflow:hidden; }
 .panel .meta b{ display:block; font-weight:500; color:var(--panel-muted); font-size:13px; }
 .panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
 .panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
+.panel .media.figure{ margin:6px 0 20px; }
+.panel .thumb img, .panel .media img{ cursor:zoom-in; }
+.todo{ color:var(--accent); }
+.lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(5,7,14,.88); cursor:zoom-out; }
+.lightbox.open{ display:flex; }
+.lightbox img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
 .panel .video{ aspect-ratio:16/9; overflow:hidden; }
 .panel video.video{ background:#000; object-fit:contain; }
 .panel .video iframe{ width:100%; height:100%; border:0; }
@@ -97,6 +103,7 @@ body.locked{ overflow:hidden; }
   background:color-mix(in srgb,var(--panel-ink) 8%,transparent); color:var(--panel-muted); font-size:14px; border:1px dashed var(--line); }
 .panel .placeholder.video::before{ content:"▷"; font-size:40px; line-height:1; color:var(--accent); }
 .panel .links{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.panel .links-label{ align-self:center; font-weight:500; font-size:14px; letter-spacing:.04em; color:var(--panel-muted); }
 .panel .links a{ padding:10px 16px; border-radius:999px; border:1px solid var(--panel-ink); color:var(--panel-ink); text-decoration:none; font-weight:500; font-size:15px; }
 .panel .links a:hover{ background:var(--panel-ink); color:var(--panel); }
 @media (prefers-reduced-motion:reduce){ .panel{ animation:none } .scene img,.hotspot::before,.hotspot span,.panel .full{ transition:none } }
@@ -143,6 +150,8 @@ body.editing .editbar{ display:block; }
   <pre id="cssout"></pre>
   <button id="copy">Copy values</button>
 </div>
+
+<div class="lightbox" id="lightbox"><img alt=""></div>
 
 <div class="backdrop" id="backdrop">
   <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
@@ -223,45 +232,47 @@ const G7 = "Portfolio Images/GameDesign/7Days/";
 const sevenDays = {
   title: "7 Days",
   summary: "A dialogue prototype where choosing what to say isn't enough: you have to survive inside the character's mind to get the outcome you picked.",
-  thumb: { image: encodeURI(G7 + "7DaysImage4.webp") },
+  thumb: { video: encodeURI(G7 + "7DaysVideo.mp4"), poster: encodeURI(G7 + "7DaysPoster.webp") },
   meta: { Type: "Prototype", Engine: "Unity", "Narrative tool": "Articy:Draft 3" },
+  // details: text (HTML allowed) or { image } shown in the order written here.
   details: [
     "<b>Minigame mechanics.</b> Saying the right thing is not always easy in real life, but in games it usually is, or a dice decides for you. Here the player carries the responsibility and the pressure of the outcome. When you pick an option you enter the character's brain, where your own mind fights against you: move the dialogue option around to dodge the obstacles. Each hit destroys a piece of you, and if nothing is left you have no choice but to say something you may regret.",
-    "<b>Story.</b> Two old friends meet in a cemetery. The tomb is too new and they still wear their black suits, so the player can guess it happened recently. In this world people don't die of old age: they are killed, die in an accident, or choose to leave.",
-    "<b>Dialogue.</b> A simple staging system in Unity: every story moment has predefined character positions, expressions and camera angle. As the dialogue advances, the script activates the right setup for each line, so the scene feels cinematic instead of two characters standing still while text appears.",
-    "<b>Programming.</b> An interactive dialogue system in Unity that links the writing in Articy:Draft 3 with custom gameplay logic: dialogue choices trigger skill-based minigames, and the player's success or failure decides which branch of the conversation plays.",
-  ],
-  media: [
-    { video: encodeURI(G7 + "7DaysVideo.mp4"), poster: encodeURI(G7 + "7DaysPoster.webp") },
-    { image: encodeURI(G7 + "7DaysImage1.webp") },
-    { image: encodeURI(G7 + "7DaysImage2.webp") },
+    { image: encodeURI(G7 + "7DaysImage4.webp") },
+    "<b>Story.</b> You play as a girl who is recovering from a life changing accident. Before it, she was vibrant, athletic and defined by her passion for climbing. After losing the ability to walk, that identity collapsed: she stopped training, stopped answering calls, stopped leaving the house. The story picks up at her lowest point, where the weight of what she has lost feels unbearable.",
+    "Her depression takes the physical form of a black cat. It talks to her, pesters her and pushes her towards giving up. In a moment of desperation, she asks for one last chance at life: seven days to actually try to live again before she has to face the cat for good.",
     { image: encodeURI(G7 + "7DaysImage3.webp") },
+    "<b>Dialogue.</b> A simple staging system in Unity: every story moment has predefined character positions, expressions and camera angle. As the dialogue advances, the script activates the right setup for each line, so the scene feels cinematic instead of two characters standing still while text appears.",
+    { image: encodeURI(G7 + "7DaysImage1.webp") },
+    "<b>Programming.</b> An interactive dialogue system in Unity that links the writing in Articy:Draft 3 with custom gameplay logic: dialogue choices trigger skill-based minigames, and the player's success or failure decides which branch of the conversation plays.",
+    "<b>Exploration.</b> In the full game, exploration is the glue that connects all these interactions. You explore a remote coastal village, meet interesting people who each carry their own struggles, and solve puzzles to help them. It is a puzzle on its own too: you can mentally place objects in the world, like a plank across a broken bridge, so crossing the village is more than walking from A to B. This part is not in the prototype yet.",
+    { image: encodeURI(G7 + "7DaysImage2.webp") },
   ],
+  links: [ { label: "itch.io", url: "https://ignavilla.itch.io/unreachedpeak" } ],
 };
 
 const GB = "Portfolio Images/GameDesign/BreadyOrNot/";
 const breadyOrNot = {
   title: "Bready or Not",
   summary: "A chaotic multiplayer game: bake bread soldiers, punch your rivals and destroy their oven before they destroy yours.",
-  thumb: { image: encodeURI(GB + "BreadyOrNotImage1.webp") },
+  thumb: { youtube: "9p7CGt3zE5I" },
   meta: { Engine: "Unity", Team: "6 students", Duration: "8 weeks", School: "Howest Digital Arts & Entertainment", "My role": "Part of the code, Unity implementation, effects, sound and design" },
   details: [
     "The goal is simple: destroy your rivals' oven before they destroy yours. Gather ingredients across the bakery and bake powerful bread soldiers to attack enemy ovens. Punch opponents to stun them and steal their ingredients, but stay sharp, because the clock is always ticking. Only one baker can rise to the top and become the next boss of the bakery!",
     "Developed over eight weeks by a team of six students as a second-year project at Howest Digital Arts & Entertainment. I was in charge of part of the code, the implementation into Unity, effects, sound and design.",
   ],
   media: [
-    { youtube: "9p7CGt3zE5I" },
+    { image: encodeURI(GB + "BreadyOrNotImage1.webp") },
     { image: encodeURI(GB + "BreadyOrNotImage2.webp") },
     { image: encodeURI(GB + "BreadyOrNotImage3.webp") },
     { image: encodeURI(GB + "BreadyOrNotImage4.webp") },
   ],
-  links: [ { label: "itch.io", url: "https://ignavilla.itch.io" } ],
+  links: [ { label: "itch.io", url: "https://ignavilla.itch.io/breadyornot" } ],
 };
 
 const content = {
   // Project screenshots go in the matching folder, e.g. { image: "Portfolio Images/GameDesign/level-1.jpg" }
   writing: { kind: "projects", title: "Writing",     intro: "Narrative design, dialogue and worldbuilding.", projects: [ proj(1), proj(2), proj(3) ] },
-  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ sevenDays, breadyOrNot, proj(3) ] },
+  games:   { kind: "projects", title: "Game Design", intro: "Here I have my top 3 games where I poured myself into.<br>I love spending an hour thinking about the design and how to make the mechanics lift with the story. <b class=\"todo\">I HAVE TO CHANGE THIS</b>", projects: [ sevenDays, breadyOrNot, proj(3) ] },
   threed:  { kind: "projects", title: "3D",          intro: "Models, environments and props.",               projects: [ proj(1), proj(2), proj(3) ] },
   // Other kinds you can attach to a hotspot later:
   // about:   { kind: "about",   title: "About me",   intro: "...", paragraphs: ["..."], media: [ { image: "" } ] },
@@ -350,9 +361,9 @@ function projectsHTML(c){
       </div>
       <div class="full"><div class="full-inner">
         <div class="meta">${Object.entries(p.meta || {}).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>
-        ${(p.details || []).map(t => `<p>${t}</p>`).join("")}
-        <div class="media">${(p.media || []).map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>
-        ${(p.links || []).length ? `<div class="links">${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
+        ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
+        ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
+        ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
       </div></div>
     </article>`).join("");
 }
@@ -382,6 +393,12 @@ function closeWindow(){
   backdrop.classList.remove("open"); document.body.classList.remove("locked");
   showPose("idle"); if (lastFocus) lastFocus.focus();
 }
+const lightbox = document.getElementById("lightbox"), lightboxImg = lightbox.querySelector("img");
+inner.addEventListener("click", e => {
+  const img = e.target.closest(".thumb img, .media img"); if (!img) return;
+  lightboxImg.src = img.currentSrc || img.src; lightboxImg.alt = img.alt; lightbox.classList.add("open");
+});
+lightbox.addEventListener("click", () => lightbox.classList.remove("open"));
 document.getElementById("close").addEventListener("click", closeWindow);
 backdrop.addEventListener("click", e => { if (e.target === backdrop) closeWindow(); });
 
@@ -401,6 +418,7 @@ function changed(h){ apply(h); refreshTable(); printOut(); }
 
 document.addEventListener("keydown", e => {
   const open = backdrop.classList.contains("open");
+  if (e.key === "Escape" && lightbox.classList.contains("open")) return lightbox.classList.remove("open");
   if (e.key === "Escape" && open) return closeWindow();
   if ((e.key === "e" || e.key === "E") && !open && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT") return toggleEdit();
   if (!editing || !selected || e.target.tagName === "INPUT") return;
