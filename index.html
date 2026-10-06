@@ -170,6 +170,8 @@ const background = encodeURI(IMG + "Background.jpg");
 const layers = {
   title:      frames("Ignacio Portfolio"),
   gameDesign: frames("Game Design"),
+  writing:    frames("Writing"),
+  threeD:     frames("3D"),
 };
 
 // The person: one list of frames per pose. "idle" = nothing hovered.
@@ -178,6 +180,12 @@ const poses = {
   left:   frames("Left"),
   center: frames("Midle"),
   right:  frames("Right"),
+};
+// Screen outline shown while a pose is hovered (one still picture each, drawn above the person).
+const highlights = {
+  left:   [ encodeURI(IMG + "Highlight Left"  + EXT) ],
+  center: [ encodeURI(IMG + "Highlight Midle" + EXT) ],
+  right:  [ encodeURI(IMG + "Highlight Right" + EXT) ],
 };
 // A layer can have any number of frames (1 = static). To use 4 frames, change [1, 2, 3] above
 // to [1, 2, 3, 4]. You can also write a list by hand: ["Portfolio Images/FirstScreen/plant.png"].
@@ -252,6 +260,7 @@ function addLayer(srcs, pose){
 }
 for (const name in layers) addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
+for (const name in highlights) addLayer(highlights[name], name);
 
 let frame = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function render(){
