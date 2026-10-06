@@ -91,6 +91,7 @@ body.locked{ overflow:hidden; }
 .panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
 .panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
 .panel .video{ aspect-ratio:16/9; overflow:hidden; }
+.panel video.video{ background:#000; object-fit:contain; }
 .panel .video iframe{ width:100%; height:100%; border:0; }
 .panel .placeholder{ aspect-ratio:16/9; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
   background:color-mix(in srgb,var(--panel-ink) 8%,transparent); color:var(--panel-muted); font-size:14px; border:1px dashed var(--line); }
@@ -218,10 +219,30 @@ function proj(n){ return {
   media: [ { image: "" }, { image: "" } ],
 }; }
 
+const G7 = "Portfolio Images/GameDesign/7Days/";
+const sevenDays = {
+  title: "7 Days",
+  summary: "A dialogue prototype where choosing what to say isn't enough: you have to survive inside the character's mind to get the outcome you picked.",
+  thumb: { image: encodeURI(G7 + "7DaysImage4.webp") },
+  meta: { Type: "Prototype", Engine: "Unity", "Narrative tool": "Articy:Draft 3" },
+  details: [
+    "<b>Minigame mechanics.</b> Saying the right thing is not always easy in real life, but in games it usually is, or a dice decides for you. Here the player carries the responsibility and the pressure of the outcome. When you pick an option you enter the character's brain, where your own mind fights against you: move the dialogue option around to dodge the obstacles. Each hit destroys a piece of you, and if nothing is left you have no choice but to say something you may regret.",
+    "<b>Story.</b> Two old friends meet in a cemetery. The tomb is too new and they still wear their black suits, so the player can guess it happened recently. In this world people don't die of old age: they are killed, die in an accident, or choose to leave.",
+    "<b>Dialogue.</b> A simple staging system in Unity: every story moment has predefined character positions, expressions and camera angle. As the dialogue advances, the script activates the right setup for each line, so the scene feels cinematic instead of two characters standing still while text appears.",
+    "<b>Programming.</b> An interactive dialogue system in Unity that links the writing in Articy:Draft 3 with custom gameplay logic: dialogue choices trigger skill-based minigames, and the player's success or failure decides which branch of the conversation plays.",
+  ],
+  media: [
+    { video: encodeURI(G7 + "7DaysVideo.mp4"), poster: encodeURI(G7 + "7DaysPoster.webp") },
+    { image: encodeURI(G7 + "7DaysImage1.webp") },
+    { image: encodeURI(G7 + "7DaysImage2.webp") },
+    { image: encodeURI(G7 + "7DaysImage3.webp") },
+  ],
+};
+
 const content = {
   // Project screenshots go in the matching folder, e.g. { image: "Portfolio Images/GameDesign/level-1.jpg" }
   writing: { kind: "projects", title: "Writing",     intro: "Narrative design, dialogue and worldbuilding.", projects: [ proj(1), proj(2), proj(3) ] },
-  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ proj(1), proj(2), proj(3) ] },
+  games:   { kind: "projects", title: "Game Design", intro: "Playable projects: mechanics, levels and feel.", projects: [ sevenDays, proj(2), proj(3) ] },
   threed:  { kind: "projects", title: "3D",          intro: "Models, environments and props.",               projects: [ proj(1), proj(2), proj(3) ] },
   // Other kinds you can attach to a hotspot later:
   // about:   { kind: "about",   title: "About me",   intro: "...", paragraphs: ["..."], media: [ { image: "" } ] },
@@ -291,6 +312,7 @@ for (const h of hotspots){
 
 // --- windows ---
 function mediaHTML(m, alt){
+  if (m.video) return `<video class="video" controls playsinline preload="none"${m.poster ? ` poster="${m.poster}"` : ""} src="${m.video}"></video>`;
   if (m.youtube !== undefined) return m.youtube
     ? `<div class="video"><iframe src="https://www.youtube.com/embed/${m.youtube}" title="${alt} video" allowfullscreen loading="lazy"></iframe></div>`
     : `<div class="placeholder video">Video</div>`;
