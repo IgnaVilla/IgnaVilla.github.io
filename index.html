@@ -124,8 +124,25 @@ body.locked{ overflow:hidden; }
 .contact-paper button, .contact-paper .contact-link{ font:inherit; font-size:.8em; font-weight:700; padding:.15em .8em; border:2px solid #1B2233; border-radius:999px;
   background:transparent; color:#1B2233; cursor:pointer; text-decoration:none; display:inline-block; }
 .contact-paper button:hover, .contact-paper .contact-link:hover{ background:#1B2233; color:#F4F1E8; }
+.contact-paper .contact-link{ display:block; width:fit-content; margin:.7em auto 0; font-size:1.15em; padding:.2em 1.6em; }
 .contact-paper .contact-close{ position:absolute; top:clamp(34px,7%,56px); right:clamp(16px,6%,40px); width:2em; height:2em; padding:0; line-height:1.6em; text-align:center; font-size:.9em; }
 @media (prefers-reduced-motion:reduce){ .contact-paper, .contact-backdrop{ transition:none } }
+
+/* ─── CV (slides up to the middle of the screen) ──────────────── */
+.cv-backdrop{ position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;
+  background:transparent; visibility:hidden; transition:background .35s ease, backdrop-filter .35s ease, visibility 0s linear .6s; }
+.cv-backdrop.open{ background:var(--dim); backdrop-filter:blur(3px); visibility:visible; transition:background .35s ease, backdrop-filter .35s ease, visibility 0s; }
+.cv-sheet{ position:relative; width:min(100%,640px); max-height:100%; display:flex; flex-direction:column; border-radius:6px; overflow:hidden;
+  background:#fff; box-shadow:0 30px 70px -10px rgba(0,0,0,.65); transform:translateY(110vh); transition:transform .6s cubic-bezier(.22,.85,.3,1); }
+.cv-backdrop.open .cv-sheet{ transform:none; }
+.cv-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:var(--panel); color:var(--panel-ink); border-bottom:1px solid var(--line); }
+.cv-bar b{ font-weight:500; }
+.cv-bar .actions{ display:flex; gap:8px; align-items:center; }
+.cv-bar a, .cv-bar button{ font:inherit; font-weight:500; font-size:14px; padding:6px 14px; border-radius:999px; border:1px solid var(--panel-ink); background:transparent; color:var(--panel-ink); cursor:pointer; text-decoration:none; }
+.cv-bar a:hover, .cv-bar button:hover{ background:var(--panel-ink); color:var(--panel); }
+.cv-pages{ overflow-y:auto; overscroll-behavior:contain; background:#fff; }
+.cv-pages img{ display:block; width:100%; height:auto; }
+@media (prefers-reduced-motion:reduce){ .cv-sheet, .cv-backdrop{ transition:none } }
 
 /* ─── edit mode (press E) ─────────────────────────────────────── */
 body.editing .hotspot{ cursor:move; }
@@ -183,6 +200,19 @@ body.editing .editbar{ display:block; }
   </section>
 </div>
 
+<div class="cv-backdrop" id="cvBackdrop" aria-hidden="true">
+  <section class="cv-sheet" id="cvSheet" role="dialog" aria-modal="true" aria-labelledby="cvTitle">
+    <div class="cv-bar">
+      <b id="cvTitle">My CV</b>
+      <div class="actions">
+        <a id="cvDownload" download>Download PDF</a>
+        <button type="button" id="cvClose" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="cv-pages" id="cvPages"></div>
+  </section>
+</div>
+
 <div class="lightbox" id="lightbox"><img alt=""></div>
 
 <div class="backdrop" id="backdrop">
@@ -213,7 +243,8 @@ const layers = {
   title:      frames("Ignacio Portfolio"),
   gameDesign: frames("Game Design"),
   writing:    frames("Writing"),
-  contactTab: [ encodeURI(IMG + "ContactMe TopRight" + EXT) ],   // the "Contact me" note, always in the top-right corner
+  contactTab: [ encodeURI(IMG + "ContactMe TopRight" + EXT) ],
+  cvPaper:    [ encodeURI(IMG + "CV Screen" + EXT) ],   // the CV on the desk; it hides while the CV is open   // the "Contact me" note, always in the top-right corner
   threeD:     frames("3D"),
 };
 
@@ -244,6 +275,7 @@ const hotspots = [
   { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
   { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
   { id: "contact", label: "Contact me",  pose: "idle",   left: 79.5, top: 0,    width: 18.5, height: 12.5, rotate: 0 },   // opens the contact page
+  { id: "cv",      label: "CV",          pose: "idle",   left: 78,   top: 71,   width: 13,   height: 22,   rotate: 0 },   // opens the CV
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -265,6 +297,11 @@ function proj(n){ return {
 const contactInfo = {
   email:    "ignavilla.urbina@gmail.com",
   linkedin: "https://www.linkedin.com/in/ignacio-villanueva-urbina-9a5327100/",
+};
+const cvInfo = {
+  pdf:   "Portfolio Images/FirstScreen/Ignacio CV.pdf",
+  pages: [ "Portfolio Images/FirstScreen/CV Page 1.webp" ],   // the CV as pictures, so it shows on any phone; the PDF is the download
+  name:  "Ignacio Villanueva CV.pdf",
 };
 const G7 = "Portfolio Images/GameDesign/7Days/";
 const sevenDays = {
@@ -435,16 +472,19 @@ document.getElementById("bg").src = background;
 const animated = [];                      // { frames:[img,...], pose:null|poseName }
 function addLayer(srcs, pose){
   const imgs = srcs.map(src => { const i = document.createElement("img"); i.className = "frame"; i.src = src; i.alt = ""; scene.insertBefore(i, scene.querySelector(".hotspot")); return i; });
-  animated.push({ frames: imgs, pose: pose || null });
+  const layer = { frames: imgs, pose: pose || null };
+  animated.push(layer); return layer;
 }
-for (const name in layers) addLayer(layers[name]);
+const layerObjs = {};
+for (const name in layers) layerObjs[name] = addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
 for (const name in highlights) addLayer(highlights[name], name);
 
+let cvOpen = false;
 let frame = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function render(){
   for (const L of animated){
-    const visible = !L.pose || L.pose === currentPose;
+    const visible = (!L.pose || L.pose === currentPose) && !(L === layerObjs.cvPaper && cvOpen);
     L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === frame % L.frames.length));
   }
 }
@@ -465,7 +505,7 @@ for (const h of hotspots){
   b.addEventListener("pointerleave", () => { if (!editing) showPose("idle"); });
   b.addEventListener("focus", () => showPose(h.pose));
   b.addEventListener("blur", () => showPose("idle"));
-  b.addEventListener("click", () => { if (editing) select(h); else if (h.id === "contact") openContact(); else openWindow(h); });
+  b.addEventListener("click", () => { if (editing) select(h); else if (h.id === "contact") openContact(); else if (h.id === "cv") openCV(); else openWindow(h); });
 }
 
 // --- windows ---
@@ -527,6 +567,23 @@ inner.addEventListener("click", e => {
   lightboxImg.src = img.currentSrc || img.src; lightboxImg.alt = img.alt; lightbox.classList.add("open");
 });
 lightbox.addEventListener("click", () => lightbox.classList.remove("open"));
+// --- CV ---
+const cvBackdrop = document.getElementById("cvBackdrop");
+document.getElementById("cvPages").innerHTML = cvInfo.pages.map(src => `<img src="${encodeURI(src)}" alt="Ignacio Villanueva, CV">`).join("");
+const cvDownload = document.getElementById("cvDownload"); cvDownload.href = encodeURI(cvInfo.pdf); cvDownload.setAttribute("download", cvInfo.name);
+function openCV(){
+  lastFocus = document.activeElement; cvOpen = true; render();          // the CV on the desk disappears…
+  cvBackdrop.classList.add("open"); cvBackdrop.setAttribute("aria-hidden", "false"); document.body.classList.add("locked");
+  setTimeout(() => document.getElementById("cvClose").focus({ preventScroll: true }), 120);
+}
+function closeCV(){
+  cvBackdrop.classList.remove("open"); cvBackdrop.setAttribute("aria-hidden", "true"); document.body.classList.remove("locked");
+  cvOpen = false; render();                                             // …and comes back when you leave
+  if (lastFocus) lastFocus.focus();
+}
+document.getElementById("cvClose").addEventListener("click", closeCV);
+cvBackdrop.addEventListener("click", e => { if (e.target === cvBackdrop) closeCV(); });
+
 // --- contact page ---
 const contactBackdrop = document.getElementById("contactBackdrop"), contactEmailEl = document.getElementById("contactEmail");
 const copyBtn = document.getElementById("copyEmail");
@@ -566,9 +623,11 @@ function select(h){
 function changed(h){ apply(h); refreshTable(); printOut(); }
 
 document.addEventListener("keydown", e => {
+  const cvIsOpen = cvBackdrop.classList.contains("open");
+  if (e.key === "Escape" && cvIsOpen) return closeCV();
   const contactOpen = contactBackdrop.classList.contains("open");
   if (e.key === "Escape" && contactOpen && !lightbox.classList.contains("open")) return closeContact();
-  const open = backdrop.classList.contains("open") || contactOpen;
+  const open = backdrop.classList.contains("open") || contactOpen || cvIsOpen;
   if (e.key === "Escape" && lightbox.classList.contains("open")) return lightbox.classList.remove("open");
   if (e.key === "Escape" && open) return closeWindow();
   if ((e.key === "e" || e.key === "E") && !open && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT") return toggleEdit();
