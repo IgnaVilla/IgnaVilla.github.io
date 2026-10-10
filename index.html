@@ -98,7 +98,11 @@ body.locked{ overflow:hidden; }
 .card.playing .card-img video{ opacity:1; }
 .card-img .none{ display:flex; align-items:center; justify-content:center; height:100%; color:var(--panel-muted); }
 .card-name{ display:block; margin-bottom:.25em; text-shadow:0 2px 8px rgba(0,0,0,.5); font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--title); }
-.card:hover .card-img, .card:focus-visible .card-img{ transform:translateY(-4px) scale(1.02); box-shadow:0 14px 34px rgba(0,0,0,.45); }
+.card-box{ position:relative; display:block; transition:transform .18s ease; }
+.card-hl{ position:absolute; left:-3%; top:-5%; width:106%; height:110%; max-width:none; opacity:0; transition:opacity .15s ease; pointer-events:none; z-index:2; }
+.card:hover .card-box, .card:focus-visible .card-box{ transform:translateY(-4px) scale(1.02); }
+.card:hover .card-hl, .card:focus-visible .card-hl{ opacity:1; }
+.card:hover .card-img, .card:focus-visible .card-img{ box-shadow:0 14px 34px rgba(0,0,0,.45); }
 .card:focus-visible{ outline:none; }
 /* one project, open: the "Back" bar never scrolls away */
 .detail-bar{ flex:none; display:none; padding:clamp(6px,1cqw,14px) clamp(16px,3.2cqw,56px) 0; }
@@ -164,7 +168,7 @@ body.locked{ overflow:hidden; }
 .panel .links-label{ align-self:center; font-weight:500; font-size:14px; letter-spacing:.04em; color:var(--panel-muted); }
 .panel .links a{ padding:10px 16px; border-radius:999px; border:1px solid var(--panel-ink); color:var(--panel-ink); text-decoration:none; font-weight:500; font-size:15px; }
 .panel .links a:hover{ background:var(--panel-ink); color:var(--panel); }
-@media (prefers-reduced-motion:reduce){ .screen{ animation:none } .scene img,.hotspot::before,.hotspot span,.card-img,.contact-tab{ transition:none } }
+@media (prefers-reduced-motion:reduce){ .screen{ animation:none } .scene img,.hotspot::before,.hotspot span,.card-img,.card-box,.card-hl,.contact-tab{ transition:none } }
 
 /* ─── contact page (slides up from the bottom) ────────────────── */
 .contact-backdrop{ position:fixed; inset:0; z-index:55; display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
@@ -320,6 +324,7 @@ const EXT = ".webp";              // ← change to ".png" if you drop in your or
 const frames = name => [1, 2, 3].map(n => encodeURI(`${IMG}${name} ${n}${EXT}`));   // "Left 1", "Left 2", "Left 3" (spaces encoded as %20)
 
 const background = encodeURI(IMG + "Background.jpg");
+const BOX_HIGHLIGHT = encodeURI(IMG + "BoxHighlight" + EXT);   // drawn on top of a project box while the mouse is over it
 
 // Decoration layers: always visible, just cycling.
 const layers = {
@@ -616,7 +621,10 @@ function projectsHTML(c){
   return `<div class="cards">${c.projects.map((p, i) => `
     <button type="button" class="card" data-i="${i}" aria-label="${p.title}">
       <span class="card-name">${p.title}</span>
-      <span class="card-img">${cardImage(p) ? `<img src="${cardImage(p)}" alt="" loading="lazy">` : `<span class="none">${p.title}</span>`}${cardVideo(p) ? `<video muted loop playsinline preload="metadata" tabindex="-1" src="${cardVideo(p)}"></video>` : ""}</span>
+      <span class="card-box">
+        <span class="card-img">${cardImage(p) ? `<img src="${cardImage(p)}" alt="" loading="lazy">` : `<span class="none">${p.title}</span>`}${cardVideo(p) ? `<video muted loop playsinline preload="metadata" tabindex="-1" src="${cardVideo(p)}"></video>` : ""}</span>
+        <img class="card-hl" src="${BOX_HIGHLIGHT}" alt="">
+      </span>
     </button>`).join("")}</div>`;
 }
 // One project, open: everything about it.
