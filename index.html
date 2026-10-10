@@ -139,6 +139,14 @@ body.locked{ overflow:hidden; }
 .todo{ color:var(--accent); }
 .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(5,7,14,.88); cursor:zoom-out; }
 .lightbox.open{ display:flex; }
+.lb-arrow{ position:absolute; top:50%; width:clamp(48px,6vw,84px); height:clamp(48px,6vw,84px); margin-top:calc(clamp(48px,6vw,84px) / -2); padding:0; border:0; background:none; cursor:pointer;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.5)); transition:transform .15s ease; z-index:2; }
+.lb-arrow svg{ width:100%; height:100%; display:block; }
+.lb-arrow path{ fill:#E0243B; stroke:#E0243B; stroke-width:8; stroke-linejoin:round; }
+.lb-arrow:hover, .lb-arrow:focus-visible{ transform:scale(1.12); outline:none; }
+.lb-prev{ left:clamp(8px,2vw,40px); } .lb-next{ right:clamp(8px,2vw,40px); }
+.lightbox.single .lb-arrow, .lightbox.single .lb-count{ display:none; }
+.lb-count{ position:absolute; bottom:clamp(8px,2vh,22px); left:50%; transform:translateX(-50%); padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; font-weight:500; }
 .lightbox img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
 .vbox{ position:relative; }
 .vbox video{ display:block; width:100%; }
@@ -279,7 +287,12 @@ body.editing .editbar{ display:block; }
   </section>
 </div>
 
-<div class="lightbox" id="lightbox"><img alt=""></div>
+<div class="lightbox" id="lightbox">
+  <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Previous image"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M46 8 L46 56 L10 32 Z" /></svg></button>
+  <img alt="">
+  <button type="button" class="lb-arrow lb-next" id="lbNext" aria-label="Next image"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 8 L18 56 L54 32 Z" /></svg></button>
+  <span class="lb-count" id="lbCount"></span>
+</div>
 
 <div class="backdrop" id="backdrop">
   <section class="screen" id="screen" role="dialog" aria-modal="true" aria-labelledby="ptitle">
@@ -380,7 +393,7 @@ const sevenDays = {
   details: [
     "<b>Minigame mechanics:</b><br>Saying the right thing is not always easy in real life, but in games it usually is, or a dice decides for you. Here the player carries the responsibility and the pressure of the outcome. When you pick an option you enter the character's brain, where your own mind fights against you: move the dialogue option around to dodge the obstacles. Each hit destroys a piece of you, and if nothing is left you have no choice but to say something you may regret.",
     { image: encodeURI(G7 + "7DaysImage4.webp") },
-    "<b>Story.</b> You play as a girl who is recovering from a life changing accident. Before it, she was vibrant, athletic and defined by her passion for climbing. After losing the ability to walk, that identity collapsed: she stopped training, stopped answering calls, stopped leaving the house. The story picks up at her lowest point, where the weight of what she has lost feels unbearable.",
+    "<b>Story.</b> You play as a girl who is recovering from a life-changing accident. Before it, she was vibrant, athletic and defined by her passion for climbing. After losing the ability to walk, that identity collapsed: she stopped training, stopped answering calls, stopped leaving the house. The story picks up at her lowest point, where the weight of what she has lost feels unbearable.",
     "Her depression takes the physical form of a black cat. It talks to her, pesters her and pushes her towards giving up. In a moment of desperation, she asks for one last chance at life: seven days to actually try to live again before she has to face the cat for good.",
     { image: encodeURI(G7 + "7DaysImage3.webp") },
     "<b>Dialogue.</b> A simple staging system in Unity: every story moment has predefined character positions, expressions and camera angle. As the dialogue advances, the script activates the right setup for each line, so the scene feels cinematic instead of two characters standing still while text appears.",
@@ -435,7 +448,7 @@ const breadyOrNot = {
 const G3 = "Portfolio Images/3D/";
 const roboCoach = {
   title: "Robo Coach",
-  summary: "A robot passed from hand to hand and finally abandoned, who wears the story of every owner in his marks.",
+  summary: "A robot who was passed from hand to hand and finally abandoned, and who wears the story of every owner in his marks.",
   thumb: { video: encodeURI(G3 + "Robo/robo.mp4"), poster: encodeURI(G3 + "Robo/poster.webp") },
   meta: { Modeling: "Blender", Texturing: "Substance Painter", Rendering: "Unity" },
   details: [
@@ -469,12 +482,15 @@ const nums = (n, from = 1) => Array.from({ length: n }, (_, i) => String(i + fro
 const sandstorm = {
   title: "Sandstorm",
   summary: "A slave on an abandoned prison planet learns she descends from one of the Four Horsemen, but all she cares about is surviving another day.",
-  thumb: { video: encodeURI(GW + "SandStorm/sandstorm.mp4"), poster: encodeURI(GW + "SandStorm/sandstorm01.webp") },
+  thumb: { image: encodeURI(GW + "SandStorm/sandstorm01.webp") },
+  card:  { video: encodeURI(GW + "SandStorm/sandstorm.mp4") },   // plays when the mouse is over the box; inside, the video sits with the other pictures
   details: [
     "The Four Horsemen failed in their mission. Some survived the apocalypse, and hundreds of years later civilization has reoccupied the galaxy.",
     "Ann is no one. She is just the slave of a merchant on an abandoned prison planet. Things like destiny, or good and bad, don't concern her, especially when a weird guy who has been looking for her all over the galaxy tells her that she is the descendant of one of the Horsemen. That doesn't matter: the only thing that matters is surviving another day.",
+    "I have created a lot of things for this world: lots of interesting and distinct races, characters, worlds and technology.",
   ],
-  media: nums(11, 2).map(n => ({ image: encodeURI(GW + `SandStorm/sandstorm${n}.webp`) })),
+  media: [ { video: encodeURI(GW + "SandStorm/sandstorm.mp4"), poster: encodeURI(GW + "SandStorm/poster.webp") },
+           ...nums(11, 2).map(n => ({ image: encodeURI(GW + `SandStorm/sandstorm${n}.webp`) })) ],
 };
 const penumbra = {
   title: "Penumbra",
@@ -484,6 +500,7 @@ const penumbra = {
     "In a world where shadows wake up and start killing their owners, people start living underground to hide from the sun.",
     "After 20 years in the shadows, people have learned how to avoid the sun. Staying too long in direct sunlight could mean certain death.",
     "In this story we follow the protagonist, one of the few people who is actually able to live with his shadow and cooperate with it. With his shadow's help he can defend himself against other shadows, try to survive, and find out what happened 20 years ago.",
+    "I have spent hours writing about the complexity of the economy, the abundant shadow civilizations, the complicated characters and the laws of this world:",
   ],
   media: [ 1, 2, 3, 4, 5, 6, 7, 8 ].map(n => ({ image: encodeURI(GW + `Penumbra/penumbra${n}.webp`) })),
 };
@@ -494,7 +511,7 @@ const grimoire = {
   card:  { image: encodeURI(GW + "Grimoire/card.webp") },   // a crop of page 7
   details: [
     "From time to time, I like to add new pages to my Grimoire. When I create these monsters or anomalies, I already think of them with a game design mindset, as if they were monsters you could find not only in Stalker, but also in Roadside Picnic.",
-    "The pages are written in Spanish.",
+    "You will be able to see some of the pages where I try to create new original creatures, weapons and supernatural occurrences. The pages are in Spanish, but I would love to talk about them all.",
   ],
   media: nums(13).filter(n => n !== "09").map(n => ({ image: encodeURI(GW + `Grimoire/grimoire${n}.webp`) })),
 };
@@ -658,11 +675,27 @@ function closeWindow(){
 }
 document.getElementById("back").addEventListener("click", showList);
 const lightbox = document.getElementById("lightbox"), lightboxImg = lightbox.querySelector("img");
+let lbImages = [], lbIndex = 0;                                      // the pictures of the project that is open
+function lbShow(i){
+  lbIndex = (i + lbImages.length) % lbImages.length;
+  const im = lbImages[lbIndex]; lightboxImg.src = im.currentSrc || im.src; lightboxImg.alt = im.alt;
+  document.getElementById("lbCount").textContent = `${lbIndex + 1} / ${lbImages.length}`;
+}
 inner.addEventListener("click", e => {
   const img = e.target.closest(".lead img, .media img"); if (!img) return;
-  lightboxImg.src = img.currentSrc || img.src; lightboxImg.alt = img.alt; lightbox.classList.add("open");
+  lbImages = [...inner.querySelectorAll(".lead img, .media img")]; lbIndex = lbImages.indexOf(img);
+  lightbox.classList.toggle("single", lbImages.length < 2);
+  lbShow(lbIndex); lightbox.classList.add("open");
 });
 lightbox.addEventListener("click", () => lightbox.classList.remove("open"));
+document.getElementById("lbPrev").addEventListener("click", e => { e.stopPropagation(); lbShow(lbIndex - 1); });
+document.getElementById("lbNext").addEventListener("click", e => { e.stopPropagation(); lbShow(lbIndex + 1); });
+let lbTouchX = null;                                                  // swipe left / right on a phone
+lightbox.addEventListener("touchstart", e => { lbTouchX = e.touches[0].clientX; }, { passive: true });
+lightbox.addEventListener("touchend", e => {
+  if (lbTouchX === null) return; const dx = e.changedTouches[0].clientX - lbTouchX; lbTouchX = null;
+  if (Math.abs(dx) > 50 && lbImages.length > 1){ lbShow(lbIndex + (dx < 0 ? 1 : -1)); e.preventDefault(); }
+});
 inner.addEventListener("click", e => {
   const hit = e.target.closest(".vhit"); if (!hit) return;
   const v = hit.parentElement.querySelector("video"); if (v.paused) v.play(); else v.pause();
@@ -731,6 +764,7 @@ function select(h){
 function changed(h){ apply(h); refreshTable(); printOut(); }
 
 document.addEventListener("keydown", e => {
+  if (lightbox.classList.contains("open") && lbImages.length > 1 && (e.key === "ArrowLeft" || e.key === "ArrowRight")){ lbShow(lbIndex + (e.key === "ArrowRight" ? 1 : -1)); return; }
   const cvIsOpen = cvBackdrop.classList.contains("open");
   if (e.key === "Escape" && cvIsOpen) return closeCV();
   const contactOpen = contactBackdrop.classList.contains("open");
