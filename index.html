@@ -97,7 +97,7 @@ body.locked{ overflow:hidden; }
 .card-img video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .2s ease; pointer-events:none; }
 .card.playing .card-img video{ opacity:1; }
 .card-img .none{ display:flex; align-items:center; justify-content:center; height:100%; color:var(--panel-muted); }
-.card-name{ display:block; margin-top:.35em; text-shadow:0 2px 8px rgba(0,0,0,.5); font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--title); }
+.card-name{ display:block; margin-bottom:.25em; text-shadow:0 2px 8px rgba(0,0,0,.5); font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--title); }
 .card:hover .card-img, .card:focus-visible .card-img{ transform:translateY(-4px) scale(1.02); box-shadow:0 14px 34px rgba(0,0,0,.45); }
 .card:focus-visible{ outline:none; }
 /* one project, open: the "Back" bar never scrolls away */
@@ -133,6 +133,8 @@ body.locked{ overflow:hidden; }
 .panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
 .panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
 .panel .media.figure{ margin:6px 0 20px; }
+.panel .media.figure.half{ width:50%; }
+@media (max-width:820px){ .panel .media.figure.half{ width:80%; } }
 .panel .media img{ cursor:zoom-in; }
 .todo{ color:var(--accent); }
 .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(5,7,14,.88); cursor:zoom-out; }
@@ -396,22 +398,17 @@ const pitOut = {
   summary: "A 2D platformer about climbing out of a pit: blast yourself upward with explosions, pull yourself up the walls, and choose how hard your own climb will be.",
   thumb: { video: encodeURI(GP + "Gameplay Trailer.mp4"), poster: encodeURI(GP + "poster.webp") },
   card:  { image: encodeURI(GP + "image3.webp") },
-  meta: { Genre: "2D platformer, deep story", "Inspired by": "Celeste, Getting Over It", Format: "Prototype + Game Design Document" },
+  meta: { Genre: "2D platformer", "Inspired by": "Celeste, Getting Over It", Format: "Prototype + Game Design Document" },
   details: [
-    "<b>The idea.</b> PitOut is a journey that feels like a never-ending pit. You start at rock bottom, and every time you get through one challenge a new one appears. The pitch is the technical platforming of Celeste, the long journey of Getting Over It, and a deep story about mental health that stays with you after you finish it.",
-    "<b>Main mechanic: the explosion.</b><br>I wanted to explore an interesting way of using the mouse in a 2D platformer: intuitive to use, hard to master. The movement of the mouse is the movement of the explosion, and that is what makes challenging platforms possible. Most of the work went into game feel: the animation, a big and satisfying explosion sound, a small screen shake, a brief frame drop and a strong impulse on the player. It works so well that testers started juggling the player in the air when there was nothing else to do.",
-    { image: encodeURI(GP + "image1.webp") },
-    "<b>Secondary mechanic: the climb.</b><br>Blowing yourself out of the pit never gave a feeling of struggle, of fighting against it. So I experimented with other mechanics and found that explosions combined with wall climbing (W + Space) created a deeper game loop. The climb should make you feel like you are pulling yourself up, but for now it matters more that the platforming is fun than that the animation sells it. The control has changed a lot, because it competed with the usefulness of a jump button against keeping the controls simple and intuitive.",
-    { image: encodeURI(GP + "image2.webp") },
+    "<b>The idea.</b> PitOut is a journey that feels like a never-ending pit. You start at rock bottom, and every time you get through one challenge, a new one appears. Think of the technical platforming of Celeste with the long journey of Getting Over It.",
+    "<b>Main mechanic: the explosion.</b><br>I wanted to explore an interesting way of using the mouse in a 2D platformer: intuitive to use, hard to master. The position of the mouse sets the center of the explosion, and the distance and position of the player relative to it determine how far they will go. The game feel turned out so good that testers started juggling the player in the air just for fun.",
+    { image: encodeURI(GP + "image1.webp"), size: "half" },
+    "<b>Secondary mechanic: the climb.</b><br>This game was meant to be a challenge, so the explosion alone didn't feel like you were pulling yourself out of the pit. That's why I made the climbing mechanic (W + Space), and combining it with the explosion resulted in a deeper game loop.",
+    { image: encodeURI(GP + "image2.webp"), size: "half" },
     "<b>Weight and stamina.</b> I tried a heavier, more robust movement, with more impact frames on landing and slower motion, but testers found it boring and too slow. Now I want to create the illusion of weight with animation while keeping the same velocity. Standing still doesn't spend stamina, so you always have time to aim or rethink your path.",
-    "<b>Systems.</b> Spikes kill instantly. It sounds basic, but it opens up many ways to make the platforming harder without relying on other systems. At the start of the first level there are fixed explosions marked with an eye drawing: you trigger them with the left mouse button and learn the force of an explosion without having to place anything. The plan is for every level to introduce one new system, taught with the Kishotenketsu structure. I also designed optional checkpoints: a shrine gives you a limited number, you can place them anywhere you touch the ground, and when you die you return to the last one. Since you don't know how tall the climb is, deciding where to place them becomes a risk management game.",
     "<b>Level design.</b><br>Each level is a long vertical climb made of connected platforming challenges. No path is the wrong path, only harder or easier. At the end of each level there is a place to rest, like a village or a view, and then you choose which route to take next, sometimes without knowing if it is a good or a bad decision. Hidden paths and villages reward exploration, and light, sound and visual clues guide you to characters, minigames and story so nothing feels random. The sketch shows how a section combines jumps, climbs and explosions.",
     { image: encodeURI(GP + "image4.webp") },
-    "<b>Difficulty is a choice.</b> My first design pillar is that the player always has more than one path. If you get stuck you can look for an easier route or work hard to beat the part that stopped you, so frustration becomes almost a decision. It also makes beating a hard section more gratifying, because nobody forced you to try it. The risk I worry about is that both kinds of players never coexist on the same map: beginners only finding expert paths they can't beat, or experts only finding easy ones. If that happens, new difficulty options will be needed.",
-    "<b>How the difficulty changes.</b> I plot two curves: <i>challenge</i>, how difficult something looks, and <i>deaths</i>, how many tries it actually takes. The difference matters, because levels with shaking ground, falling rocks and rising lava look hard but are usually beaten on the first try.",
-    "<b>The Fall:</b> safe and easy while you learn the controls, then both curves shoot up as things go wrong, so you realize this game is going to be hard and you will fail many times.<br><b>The Climb:</b> in most games your skills catch up and you stop dying. Here I want the challenge to keep rising, so it stays demanding the further you go.<br><b>The Summit:</b> everything looks impossible, but your experience shows you how far you have come, so it is easier to beat than it appears.",
-    "<b>Story and the fall.</b> The story has three parts: The Fall, The Climb and The Summit. You begin in a colorful, \"perfect\" world where you can experiment with the mechanics safely. That matters, because the joy of learning the controls is exactly the feeling I want to crash against when you wake up at the bottom of the pit. For the transition, a black ominous wall slowly follows you while the platforming gets harder, until it grabs you and throws you down. The gameplay reflects the story: when you are happy you move faster, and in the pit your movement starts slow and you regain speed as you climb. The story isn't there to tell you to just get over it, but to encourage you: if you fall, you should want to see what is at the top.",
-    { image: encodeURI(GP + "image3.webp") },
+    "<b>Difficulty is a choice.</b> When I designed this game, my rule was that the player always has more than one path: if you get stuck, you can look for an easier route or push through the hard one, so frustration becomes almost a decision and beating a tough section feels earned. The difficulty then rises in three stages: the fall starts safe and ramps up fast, the climb keeps challenging you instead of letting your skills catch up, and the summit looks impossible but feels easier thanks to how far you have come. The hard part is making beginners and experts coexist on the same map.",
   ],
 };
 
@@ -535,30 +532,37 @@ function apply(h){
   b.style.transform = `rotate(${h.rotate}deg)`;
 }
 
+// The clock ticks 3 times per frame. A layer normally advances every 3rd tick (SLOW); the word of the screen under the mouse advances every tick, so it runs 3× faster.
+const SLOW = 3, FAST = 1, WORD_OF = { writing: "writing", games: "gameDesign", threed: "threeD" };
 // --- animated layers ---
 document.getElementById("bg").src = background;
 const animated = [];                      // { frames:[img,...], pose:null|poseName }
 function addLayer(srcs, pose){
   const imgs = srcs.map(src => { const i = document.createElement("img"); i.className = "frame"; i.src = src; i.alt = ""; scene.insertBefore(i, scene.querySelector(".hotspot")); return i; });
-  const layer = { frames: imgs, pose: pose || null };
+  const layer = { frames: imgs, pose: pose || null, n: 0, step: SLOW };
   animated.push(layer); return layer;
 }
-for (const name in layers) addLayer(layers[name]);
+const layerByName = {};
+for (const name in layers) layerByName[name] = addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
 for (const name in highlights) addLayer(highlights[name], name);
 
-let frame = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
+let tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
+function speedUpWord(hotspotId){
+  for (const name in layers) layerByName[name].step = SLOW;
+  if (hotspotId && WORD_OF[hotspotId]) layerByName[WORD_OF[hotspotId]].step = FAST;
+}
 function render(){
   for (const L of animated){
     const visible = !L.pose || L.pose === currentPose;
-    L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === frame % L.frames.length));
+    L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === L.n % L.frames.length));
   }
 }
 function showPose(key){ if (!poses[key]) key = "idle"; if (key === currentPose) return; currentPose = key; render(); }
 function setFrameSeconds(sec){           // also callable from the browser console: setFrameSeconds(0.5)
   frameSeconds = Math.max(0.05, Number(sec) || FRAME_SECONDS);
   clearInterval(timer);
-  timer = setInterval(() => { frame = (frame + 1) % 60; render(); }, frameSeconds * 1000);
+  timer = setInterval(() => { tick = (tick + 1) % 3600; for (const L of animated) if (tick % L.step === 0) L.n = (L.n + 1) % 3600; render(); }, frameSeconds * 1000 / SLOW);
   const f = document.getElementById("frameSecs"); if (f && document.activeElement !== f) f.value = frameSeconds;
 }
 render(); setFrameSeconds(FRAME_SECONDS);
@@ -567,10 +571,10 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) clear
 
 for (const h of hotspots){
   const b = els[h.id];
-  b.addEventListener("pointerenter", () => { if (!editing) showPose(h.pose); });
-  b.addEventListener("pointerleave", () => { if (!editing) showPose("idle"); });
-  b.addEventListener("focus", () => showPose(h.pose));
-  b.addEventListener("blur", () => showPose("idle"));
+  b.addEventListener("pointerenter", () => { if (!editing) { showPose(h.pose); speedUpWord(h.id); } });
+  b.addEventListener("pointerleave", () => { if (!editing) { showPose("idle"); speedUpWord(null); } });
+  b.addEventListener("focus", () => { showPose(h.pose); speedUpWord(h.id); });
+  b.addEventListener("blur", () => { showPose("idle"); speedUpWord(null); });
   b.addEventListener("click", () => { if (editing) select(h); else openWindow(h); });
 }
 
@@ -593,8 +597,8 @@ function cardVideo(p){ return (p.card && p.card.video) || (p.thumb && p.thumb.vi
 function projectsHTML(c){
   return `<div class="cards">${c.projects.map((p, i) => `
     <button type="button" class="card" data-i="${i}" aria-label="${p.title}">
-      <span class="card-img">${cardImage(p) ? `<img src="${cardImage(p)}" alt="" loading="lazy">` : `<span class="none">${p.title}</span>`}${cardVideo(p) ? `<video muted loop playsinline preload="metadata" tabindex="-1" src="${cardVideo(p)}"></video>` : ""}</span>
       <span class="card-name">${p.title}</span>
+      <span class="card-img">${cardImage(p) ? `<img src="${cardImage(p)}" alt="" loading="lazy">` : `<span class="none">${p.title}</span>`}${cardVideo(p) ? `<video muted loop playsinline preload="metadata" tabindex="-1" src="${cardVideo(p)}"></video>` : ""}</span>
     </button>`).join("")}</div>`;
 }
 // One project, open: everything about it.
@@ -604,7 +608,7 @@ function projectHTML(p){
     <p class="summary">${p.summary}</p>
     <div class="lead">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
-    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
+    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure${t.size === "half" ? " half" : ""}">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
     ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
     ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
   </article>`;
@@ -650,7 +654,7 @@ function openWindow(h){
 }
 function closeWindow(){
   backdrop.classList.remove("open"); lockBody();
-  showPose("idle"); if (lastFocus) lastFocus.focus();
+  showPose("idle"); speedUpWord(null); if (lastFocus) lastFocus.focus();
 }
 document.getElementById("back").addEventListener("click", showList);
 const lightbox = document.getElementById("lightbox"), lightboxImg = lightbox.querySelector("img");
