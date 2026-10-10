@@ -33,13 +33,18 @@ body.locked{ overflow:hidden; }
 .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 
 /* ─── scene (fills the whole window) ──────────────────────────── */
-/* The picture is as wide as the window. If the window is taller than the picture it is centred;
-   if it is shorter, the bottom of the picture is cropped (the top, with the title, always stays). */
-.stage{ height:100vh; height:100dvh; width:100%; overflow:hidden; display:flex; flex-direction:column; background:var(--bg); }
-.scene{
-  position:relative; flex:none; width:100%; margin:auto 0;
-  aspect-ratio:16/10; background:#4d5962; user-select:none;
-}
+/* The picture is always exactly as TALL as the window. Its width follows (wider window = more floor and wall
+   at the sides, narrower window = the sides are cropped). On very wide windows the edges are stretched. */
+:root{ --h:100vh; }
+@supports (height:100dvh){ :root{ --h:100dvh; } }
+@media (max-aspect-ratio:13/10){ :root{ --h:calc(100vw * .625); } }   /* tall windows (phones): fit the width instead */
+.stage{ position:relative; height:100vh; height:100dvh; width:100%; overflow:hidden; background-color:var(--bg);
+  background-image:url("Portfolio Images/FirstScreen/Background EdgeLeft.png"), url("Portfolio Images/FirstScreen/Background EdgeRight.png");
+  background-repeat:no-repeat; background-size:50% var(--h), 50% var(--h); background-position:left center, right center; }
+.world{ position:absolute; left:50%; top:50%; height:var(--h); width:calc(var(--h) * 3417 / 1600); transform:translate(-50%,-50%); }
+.world > #bg{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+/* the 2560×1600 layers and the clickable areas sit in the middle of the wider background */
+.scene{ position:absolute; top:0; height:100%; left:12.643%; width:74.92%; user-select:none; }
 .scene img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
 .scene img.frame{ visibility:hidden; }
 .scene img.frame.show{ visibility:visible; }
@@ -65,7 +70,7 @@ body.locked{ overflow:hidden; }
 .contact-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
 /* ─── project window: lives inside the big screen picture ─────── */
-.backdrop{ position:fixed; inset:0; background:var(--dim); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:50; }
+.backdrop{ position:fixed; inset:0; background:rgba(14,18,26,.32); backdrop-filter:blur(7px); display:none; align-items:center; justify-content:center; z-index:50; }
 .backdrop.open{ display:flex; }
 @keyframes rise{ from{ transform:translateY(18px) scale(.985); opacity:0 } to{ transform:none; opacity:1 } }
 .screen{ position:relative; width:min(99vw, calc(99dvh * 2100 / 1323)); aspect-ratio:2100/1323; container-type:inline-size; animation:rise .3s ease-out;
@@ -79,17 +84,17 @@ body.locked{ overflow:hidden; }
   font-size:clamp(14px,1.05cqw,18px); }
 .panel .inner{ flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-direction:column;
   padding:clamp(10px,1.8cqw,34px) clamp(16px,3.2cqw,56px) clamp(18px,2.6cqw,44px); }
-.panel .head{ padding-right:9%; }
-.panel h2{ margin:0 0 .1em; font-family:"Caveat","Segoe Script",cursive; font-size:clamp(36px,5.4cqw,92px); font-weight:700; letter-spacing:.01em; line-height:1; color:var(--pink); }
-.panel .tag{ margin:0; color:var(--panel-muted); font-size:clamp(14px,1.5cqw,22px); max-width:72ch; line-height:1.45; }
+.panel .head{ text-align:center; }
+.panel h2{ margin:0 0 .1em; text-shadow:0 2px 8px rgba(0,0,0,.45); font-family:"Caveat","Segoe Script",cursive; font-size:clamp(36px,5.4cqw,92px); font-weight:700; letter-spacing:.01em; line-height:1; color:var(--pink); }
+.panel .tag{ margin:.2em auto 0; color:#E4EAF0; font-size:clamp(14px,1.5cqw,22px); max-width:72ch; line-height:1.45; text-shadow:0 1px 6px rgba(0,0,0,.55); }
 /* the three project boxes */
-.cards{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(14px,2.6cqw,48px); margin-top:auto; padding-top:clamp(18px,3cqw,48px); }
+.cards{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(14px,2.6cqw,48px); margin-top:auto; margin-bottom:clamp(28px,7cqw,130px); padding-top:clamp(18px,3cqw,48px); }
 .card{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; text-align:center; }
-.card-img{ display:block; aspect-ratio:16/9; border:clamp(3px,.45cqw,8px) solid #E07C7C; border-radius:clamp(6px,.9cqw,16px); overflow:hidden; background:rgba(255,255,255,.07);
+.card-img{ display:block; aspect-ratio:16/9; border-radius:clamp(6px,.9cqw,16px); overflow:hidden; background:rgba(255,255,255,.07); box-shadow:0 8px 24px rgba(0,0,0,.35);
   transition:transform .18s ease, box-shadow .18s ease; }
 .card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
 .card-img .none{ display:flex; align-items:center; justify-content:center; height:100%; color:var(--panel-muted); }
-.card-name{ display:block; margin-top:.35em; font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--pink); }
+.card-name{ display:block; margin-top:.35em; text-shadow:0 2px 8px rgba(0,0,0,.5); font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--pink); }
 .card:hover .card-img, .card:focus-visible .card-img{ transform:translateY(-4px) scale(1.02); box-shadow:0 14px 34px rgba(0,0,0,.45); }
 .card:focus-visible{ outline:none; }
 /* one project, open: the "Back" bar never scrolls away */
@@ -110,11 +115,11 @@ body.locked{ overflow:hidden; }
   .screen-x{ left:auto; right:8px; top:8px; width:44px; height:44px; background:#C4223F; border:2px solid #1D2833; }
   .screen-x::before{ content:"\00d7"; color:#1D2833; font-size:30px; line-height:38px; font-weight:700; display:block; }
   .panel{ left:0; right:0; top:0; bottom:0; font-size:15px; }
-  .panel .head{ padding-right:56px; }
+  .panel .head{ padding:0 48px; }
   .panel .inner{ padding:14px 16px 24px; }
   .panel h2{ font-size:44px; }
   .panel .tag{ font-size:15px; }
-  .cards{ grid-template-columns:1fr; margin-top:20px; gap:18px; }
+  .cards{ grid-template-columns:1fr; margin-top:20px; margin-bottom:0; gap:18px; }
   .card-name{ font-size:30px; }
   .detail-bar{ padding:8px 60px 0 16px; }
   .back{ font-size:15px; }
@@ -209,9 +214,11 @@ body.editing .editbar{ display:block; }
 <h1 class="sr-only">Ignacio — Portfolio</h1>
 
 <main class="stage">
-  <div class="scene" id="scene" aria-label="Ignacio at his desk">
+  <div class="world">
     <img id="bg" alt="">
-    <!-- animated layers are added here by the script -->
+    <div class="scene" id="scene" aria-label="Ignacio at his desk">
+      <!-- animated layers are added here by the script -->
+    </div>
   </div>
 </main>
 
