@@ -28,17 +28,17 @@ html,body{ margin:0; min-height:100%; }
 body{
   background:var(--bg); color:var(--ink);
   font-family:"Outfit","Segoe UI",system-ui,-apple-system,sans-serif; font-weight:300; line-height:1.55;
-  display:flex; flex-direction:column; align-items:center;
-  padding: clamp(12px,3vw,40px) clamp(10px,3vw,32px);
 }
 body.locked{ overflow:hidden; }
 .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 
-/* ─── scene ───────────────────────────────────────────────────── */
+/* ─── scene (fills the whole window) ──────────────────────────── */
+/* The picture is as wide as the window. If the window is taller than the picture it is centred;
+   if it is shorter, the bottom of the picture is cropped (the top, with the title, always stays). */
+.stage{ height:100vh; height:100dvh; width:100%; overflow:hidden; display:flex; flex-direction:column; background:var(--bg); }
 .scene{
-  position:relative; flex:none; width:100%; max-width:var(--scene-max-width);
-  aspect-ratio:16/10; border-radius:14px; overflow:hidden; background:#4d5962;
-  box-shadow:0 30px 60px -30px rgba(0,0,0,.6); user-select:none;
+  position:relative; flex:none; width:100%; margin:auto 0;
+  aspect-ratio:16/10; background:#4d5962; user-select:none;
 }
 .scene img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
 .scene img.frame{ visibility:hidden; }
@@ -56,41 +56,76 @@ body.locked{ overflow:hidden; }
   font-size:13px; font-weight:500; letter-spacing:.02em; white-space:nowrap;
   opacity:0; transform:translateY(4px); transition:opacity .18s, transform .18s;
 }
-.hint{ margin-top:12px; font-size:14px; color:var(--muted); }
-.hint kbd{ font:inherit; padding:1px 6px; border:1px solid var(--muted); border-radius:4px; }
 
-/* ─── project window ──────────────────────────────────────────── */
-.backdrop{ position:fixed; inset:0; background:var(--dim); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center;
-  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; }
+/* "Contact me" note: always in the top-right corner of the window */
+.contact-tab{ position:fixed; top:0; right:clamp(8px,1.6vw,32px); z-index:20; width:clamp(120px,15.5vw,300px); padding:0; border:0; background:none; cursor:pointer;
+  transition:transform .18s ease; filter:drop-shadow(0 4px 8px rgba(0,0,0,.25)); }
+.contact-tab img{ display:block; width:100%; height:auto; }
+.contact-tab:hover, .contact-tab:focus-visible{ transform:translateY(4px); }
+.contact-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+/* ─── project window: lives inside the big screen picture ─────── */
+.backdrop{ position:fixed; inset:0; background:var(--dim); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:50; }
 .backdrop.open{ display:flex; }
-.panel{ position:relative; width:100%; max-width:var(--popup-max-width); max-height:100%; background:var(--panel); color:var(--panel-ink);
-  border-radius:16px; overflow-y:auto; overscroll-behavior:contain; box-shadow:0 40px 80px -20px rgba(0,0,0,.6); animation:rise .22s ease-out; }
-@keyframes rise{ from{ transform:translateY(18px); opacity:0 } to{ transform:none; opacity:1 } }
-.panel .close{ position:sticky; top:12px; float:right; margin:12px 12px 0 0; width:40px; height:40px; border-radius:50%; border:0; cursor:pointer;
-  background:var(--panel-ink); color:var(--panel); font-size:22px; line-height:40px; text-align:center; z-index:2; }
-.panel .inner{ padding:28px clamp(20px,5vw,48px) 48px; clear:both; }
-.panel h2{ margin:0 0 4px; font-size:clamp(28px,4vw,40px); font-weight:700; letter-spacing:-.02em; line-height:1.05; }
-.panel .tag{ margin:0 0 22px; color:var(--panel-muted); font-size:16px; }
-.panel .project{ border-top:1px solid var(--line); padding:22px 0; }
-.panel .project:last-child{ border-bottom:1px solid var(--line); }
-.panel .row{ display:grid; grid-template-columns:1fr minmax(160px,50%); gap:18px 24px; align-items:start; }
-@media (max-width:520px){ .panel .row{ grid-template-columns:1fr; } .panel .thumb{ order:-1; } }
-.panel h3{ margin:0 0 6px; font-size:22px; font-weight:500; line-height:1.15; }
-.panel .summary{ margin:0 0 12px; font-size:16px; color:var(--panel-muted); max-width:52ch; }
-.panel .more{ font:inherit; font-weight:500; font-size:14px; padding:6px 14px; border-radius:999px; cursor:pointer; border:1px solid var(--panel-ink); background:transparent; color:var(--panel-ink); }
-.panel .more:hover, .panel .project.open .more{ background:var(--panel-ink); color:var(--panel); }
-.panel .thumb img, .panel .thumb .video, .panel .thumb .placeholder{ aspect-ratio:16/9; width:100%; object-fit:cover; border-radius:8px; display:block; }
-.panel .full{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
-.panel .project.open .full{ grid-template-rows:1fr; }
-.panel .full-inner{ overflow:hidden; min-height:0; }
-.panel .project.open .full-inner{ padding-top:18px; }
-.panel p{ margin:0 0 14px; max-width:62ch; font-size:17px; }
+@keyframes rise{ from{ transform:translateY(18px) scale(.985); opacity:0 } to{ transform:none; opacity:1 } }
+.screen{ position:relative; width:min(99vw, calc(99dvh * 2100 / 1323)); aspect-ratio:2100/1323; container-type:inline-size; animation:rise .3s ease-out;
+  --panel:#1F2A36; --panel-ink:#F2F2F0; --panel-muted:#B9C4CE; --line:rgba(255,255,255,.2); --pink:#F08A8A; color:var(--panel-ink); }
+.screen-frame{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+.screen-x{ position:absolute; left:92.9%; top:2.6%; width:4.8%; height:7.8%; z-index:5; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; }
+.screen-x:hover{ background:rgba(255,255,255,.12); }
+.screen-x:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
+/* the glass area of the picture */
+.panel{ position:absolute; left:4.71%; right:3.5%; top:5.35%; bottom:10.3%; display:flex; flex-direction:column; overflow:hidden;
+  font-size:clamp(14px,1.05cqw,18px); }
+.panel .inner{ flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-direction:column;
+  padding:clamp(10px,1.8cqw,34px) clamp(16px,3.2cqw,56px) clamp(18px,2.6cqw,44px); }
+.panel .head{ padding-right:9%; }
+.panel h2{ margin:0 0 .1em; font-family:"Caveat","Segoe Script",cursive; font-size:clamp(36px,5.4cqw,92px); font-weight:700; letter-spacing:.01em; line-height:1; color:var(--pink); }
+.panel .tag{ margin:0; color:var(--panel-muted); font-size:clamp(14px,1.5cqw,22px); max-width:72ch; line-height:1.45; }
+/* the three project boxes */
+.cards{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(14px,2.6cqw,48px); margin-top:auto; padding-top:clamp(18px,3cqw,48px); }
+.card{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; text-align:center; }
+.card-img{ display:block; aspect-ratio:16/9; border:clamp(3px,.45cqw,8px) solid #E07C7C; border-radius:clamp(6px,.9cqw,16px); overflow:hidden; background:rgba(255,255,255,.07);
+  transition:transform .18s ease, box-shadow .18s ease; }
+.card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.card-img .none{ display:flex; align-items:center; justify-content:center; height:100%; color:var(--panel-muted); }
+.card-name{ display:block; margin-top:.35em; font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:clamp(24px,3cqw,52px); line-height:1; color:var(--pink); }
+.card:hover .card-img, .card:focus-visible .card-img{ transform:translateY(-4px) scale(1.02); box-shadow:0 14px 34px rgba(0,0,0,.45); }
+.card:focus-visible{ outline:none; }
+/* one project, open: the "Back" bar never scrolls away */
+.detail-bar{ flex:none; display:none; padding:clamp(6px,1cqw,14px) clamp(16px,3.2cqw,56px) 0; }
+.panel.detailing .detail-bar{ display:block; }
+.back{ font:inherit; font-weight:500; font-size:clamp(14px,1.3cqw,19px); padding:.35em 1.1em; border-radius:999px; border:2px solid var(--pink); background:rgba(20,28,38,.55); color:var(--panel-ink); cursor:pointer; }
+.back:hover, .back:focus-visible{ background:var(--pink); color:#1F2A36; outline:none; }
+.detail{ width:100%; max-width:1000px; margin:0 auto; }
+.detail .summary{ margin:.2em 0 1em; font-size:1.1em; color:var(--panel-muted); max-width:62ch; }
+.detail .lead{ margin:0 0 1.2em; }
+.detail .lead img, .detail .lead .video{ aspect-ratio:16/9; width:100%; object-fit:cover; border-radius:10px; display:block; background:#000; }
+.detail .lead img{ cursor:zoom-in; }
+@media (max-width:820px), (max-aspect-ratio:11/10){
+  /* narrow or tall windows (phones): the screen fills the window and the frame is drawn with CSS */
+  .screen{ width:100%; height:100%; aspect-ratio:auto; border:clamp(6px,2vw,12px) solid #1D2833; border-radius:clamp(14px,4vw,24px);
+    background:radial-gradient(ellipse at 50% 40%, #50688a 0%, #2c4260 55%, #1f3149 100%); }
+  .screen-frame{ display:none; }
+  .screen-x{ left:auto; right:8px; top:8px; width:44px; height:44px; background:#C4223F; border:2px solid #1D2833; }
+  .screen-x::before{ content:"\00d7"; color:#1D2833; font-size:30px; line-height:38px; font-weight:700; display:block; }
+  .panel{ left:0; right:0; top:0; bottom:0; font-size:15px; }
+  .panel .head{ padding-right:56px; }
+  .panel .inner{ padding:14px 16px 24px; }
+  .panel h2{ font-size:44px; }
+  .panel .tag{ font-size:15px; }
+  .cards{ grid-template-columns:1fr; margin-top:20px; gap:18px; }
+  .card-name{ font-size:30px; }
+  .detail-bar{ padding:8px 60px 0 16px; }
+  .back{ font-size:15px; }
+}
+.panel p{ margin:0 0 14px; max-width:68ch; font-size:17px; }
 .panel .meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px 20px; margin:0 0 18px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--panel-ink) 6%,transparent); font-size:15px; }
 .panel .meta b{ display:block; font-weight:500; color:var(--panel-muted); font-size:13px; }
 .panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
 .panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
 .panel .media.figure{ margin:6px 0 20px; }
-.panel .thumb img, .panel .media img{ cursor:zoom-in; }
+.panel .media img{ cursor:zoom-in; }
 .todo{ color:var(--accent); }
 .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(5,7,14,.88); cursor:zoom-out; }
 .lightbox.open{ display:flex; }
@@ -105,7 +140,7 @@ body.locked{ overflow:hidden; }
 .panel .links-label{ align-self:center; font-weight:500; font-size:14px; letter-spacing:.04em; color:var(--panel-muted); }
 .panel .links a{ padding:10px 16px; border-radius:999px; border:1px solid var(--panel-ink); color:var(--panel-ink); text-decoration:none; font-weight:500; font-size:15px; }
 .panel .links a:hover{ background:var(--panel-ink); color:var(--panel); }
-@media (prefers-reduced-motion:reduce){ .panel{ animation:none } .scene img,.hotspot::before,.hotspot span,.panel .full{ transition:none } }
+@media (prefers-reduced-motion:reduce){ .screen{ animation:none } .scene img,.hotspot::before,.hotspot span,.card-img,.contact-tab{ transition:none } }
 
 /* ─── contact page (slides up from the bottom) ────────────────── */
 .contact-backdrop{ position:fixed; inset:0; z-index:55; display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
@@ -121,15 +156,17 @@ body.locked{ overflow:hidden; }
 .contact-paper p{ margin:0 0 .7em; }
 .contact-email{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 .8em; }
 .contact-email a{ color:inherit; font-weight:700; text-decoration:underline; text-underline-offset:3px; word-break:break-all; }
-.contact-paper button, .contact-paper .contact-link{ font:inherit; font-size:.8em; font-weight:700; padding:.15em .8em; border:2px solid #1B2233; border-radius:999px;
+.contact-paper button, .contact-paper .contact-link, .contact-paper .contact-btn{ font:inherit; font-size:.8em; font-weight:700; padding:.15em .8em; border:2px solid #1B2233; border-radius:999px;
   background:transparent; color:#1B2233; cursor:pointer; text-decoration:none; display:inline-block; }
-.contact-paper button:hover, .contact-paper .contact-link:hover{ background:#1B2233; color:#F4F1E8; }
+.contact-paper button:hover, .contact-paper .contact-link:hover, .contact-paper .contact-btn:hover{ background:#1B2233; color:#F4F1E8; }
 .contact-paper .contact-link{ display:block; width:fit-content; margin:.7em auto 0; font-size:1.15em; padding:.2em 1.6em; }
+.contact-paper .contact-cv-text{ margin-top:1.1em; margin-bottom:.3em; }
+.contact-cv{ display:flex; flex-wrap:wrap; gap:8px 12px; margin-top:.2em; }
 .contact-paper .contact-close{ position:absolute; top:clamp(34px,7%,56px); right:clamp(16px,6%,40px); width:2em; height:2em; padding:0; line-height:1.6em; text-align:center; font-size:.9em; }
 @media (prefers-reduced-motion:reduce){ .contact-paper, .contact-backdrop{ transition:none } }
 
 /* ─── CV (slides up to the middle of the screen) ──────────────── */
-.cv-backdrop{ position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;
+.cv-backdrop{ position:fixed; inset:0; z-index:56; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;
   background:transparent; visibility:hidden; transition:background .35s ease, backdrop-filter .35s ease, visibility 0s linear .6s; }
 .cv-backdrop.open{ background:var(--dim); backdrop-filter:blur(3px); visibility:visible; transition:background .35s ease, backdrop-filter .35s ease, visibility 0s; }
 .cv-sheet{ position:relative; width:min(100%,640px); max-height:100%; display:flex; flex-direction:column; border-radius:6px; overflow:hidden;
@@ -171,11 +208,14 @@ body.editing .editbar{ display:block; }
 <body>
 <h1 class="sr-only">Ignacio — Portfolio</h1>
 
-<div class="scene" id="scene" aria-label="Ignacio at his desk">
-  <img id="bg" alt="">
-  <!-- animated layers are added here by the script -->
-</div>
-<p class="hint">Hover something on the desk, click to open it. Press <kbd>E</kbd> to edit the hotspots.</p>
+<main class="stage">
+  <div class="scene" id="scene" aria-label="Ignacio at his desk">
+    <img id="bg" alt="">
+    <!-- animated layers are added here by the script -->
+  </div>
+</main>
+
+<button class="contact-tab" id="contactTab" aria-label="Contact me" aria-haspopup="dialog"><img src="Portfolio Images/FirstScreen/ContactMe Tab.webp" alt=""></button>
 
 <div class="editbar" id="editbar">
   <strong>Edit mode</strong> — drag a hotspot to move it, the square corner to resize, the round handle on top to rotate freely. Or type the numbers directly.
@@ -197,6 +237,11 @@ body.editing .editbar{ display:block; }
       <button type="button" id="copyEmail">Copy email</button>
     </div>
     <a class="contact-link" id="contactLinkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <p class="contact-cv-text">And here is my CV:</p>
+    <div class="contact-cv">
+      <button type="button" id="openCV">View CV</button>
+      <a class="contact-btn" id="cvDownloadContact" download>Download PDF</a>
+    </div>
   </section>
 </div>
 
@@ -216,9 +261,13 @@ body.editing .editbar{ display:block; }
 <div class="lightbox" id="lightbox"><img alt=""></div>
 
 <div class="backdrop" id="backdrop">
-  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
-    <button class="close" id="close" aria-label="Close">×</button>
-    <div class="inner" id="inner"></div>
+  <section class="screen" id="screen" role="dialog" aria-modal="true" aria-labelledby="ptitle">
+    <img class="screen-frame" src="Portfolio Images/FirstScreen/PantallaFull.webp" alt="">
+    <button class="screen-x" id="close" aria-label="Close"></button>
+    <div class="panel" id="panel">
+      <div class="detail-bar"><button type="button" class="back" id="back">&larr; Back</button></div>
+      <div class="inner" id="inner"></div>
+    </div>
   </section>
 </div>
 
@@ -243,8 +292,6 @@ const layers = {
   title:      frames("Ignacio Portfolio"),
   gameDesign: frames("Game Design"),
   writing:    frames("Writing"),
-  contactTab: [ encodeURI(IMG + "ContactMe TopRight" + EXT) ],
-  cvPaper:    [ encodeURI(IMG + "CV Screen" + EXT) ],   // the CV on the desk; it hides while the CV is open   // the "Contact me" note, always in the top-right corner
   threeD:     frames("3D"),
 };
 
@@ -274,8 +321,6 @@ const hotspots = [
   { id: "writing", label: "Writing",     pose: "left",   left: 12,   top: 32.5, width: 23,   height: 25.5, rotate: -7 },
   { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
   { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
-  { id: "contact", label: "Contact me",  pose: "idle",   left: 79.5, top: 0,    width: 18.5, height: 12.5, rotate: 0 },   // opens the contact page
-  { id: "cv",      label: "CV",          pose: "idle",   left: 78,   top: 71,   width: 13,   height: 22,   rotate: 0 },   // opens the CV
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -475,16 +520,14 @@ function addLayer(srcs, pose){
   const layer = { frames: imgs, pose: pose || null };
   animated.push(layer); return layer;
 }
-const layerObjs = {};
-for (const name in layers) layerObjs[name] = addLayer(layers[name]);
+for (const name in layers) addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
 for (const name in highlights) addLayer(highlights[name], name);
 
-let cvOpen = false;
 let frame = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function render(){
   for (const L of animated){
-    const visible = (!L.pose || L.pose === currentPose) && !(L === layerObjs.cvPaper && cvOpen);
+    const visible = !L.pose || L.pose === currentPose;
     L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === frame % L.frames.length));
   }
 }
@@ -505,7 +548,7 @@ for (const h of hotspots){
   b.addEventListener("pointerleave", () => { if (!editing) showPose("idle"); });
   b.addEventListener("focus", () => showPose(h.pose));
   b.addEventListener("blur", () => showPose("idle"));
-  b.addEventListener("click", () => { if (editing) select(h); else if (h.id === "contact") openContact(); else if (h.id === "cv") openCV(); else openWindow(h); });
+  b.addEventListener("click", () => { if (editing) select(h); else openWindow(h); });
 }
 
 // --- windows ---
@@ -516,24 +559,30 @@ function mediaHTML(m, alt){
     : `<div class="placeholder video">Video</div>`;
   return m.image ? `<img src="${m.image}" alt="${alt}" loading="lazy">` : `<div class="placeholder">Screenshot</div>`;
 }
+// A card's picture: its own picture, else the video's poster, else the first screenshot.
+function cardImage(p){
+  const t = p.thumb || {};
+  return t.image || t.poster || ((p.media || []).find(m => m.image) || {}).image || ((p.details || []).find(d => typeof d !== "string" && d.image) || {}).image || "";
+}
+// The list: title, explanation and one box per project.
 function projectsHTML(c){
-  return c.projects.map((p,i) => `
-    <article class="project">
-      <div class="row">
-        <div class="text">
-          <h3>${p.title}</h3>
-          <p class="summary">${p.summary}</p>
-          <button class="more" aria-expanded="false">More</button>
-        </div>
-        <div class="thumb">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
-      </div>
-      <div class="full"><div class="full-inner">
-        ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
-        ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
-        ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
-        ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
-      </div></div>
-    </article>`).join("");
+  return `<div class="cards">${c.projects.map((p, i) => `
+    <button type="button" class="card" data-i="${i}" aria-label="${p.title}">
+      <span class="card-img">${cardImage(p) ? `<img src="${cardImage(p)}" alt="" loading="lazy">` : `<span class="none">${p.title}</span>`}</span>
+      <span class="card-name">${p.title}</span>
+    </button>`).join("")}</div>`;
+}
+// One project, open: everything about it.
+function projectHTML(p){
+  return `<article class="detail">
+    <h2 id="ptitle">${p.title}</h2>
+    <p class="summary">${p.summary}</p>
+    <div class="lead">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
+    ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
+    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
+    ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
+    ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
+  </article>`;
 }
 function aboutHTML(c){
   return `${(c.paragraphs || []).map(t => `<p>${t}</p>`).join("")}<div class="media">${(c.media || []).map(m => mediaHTML(m, c.title)).join("")}</div>`;
@@ -542,46 +591,58 @@ function contactHTML(c){
   const links = (c.links || []).filter(l => l.url).map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("");
   return `<p><a href="mailto:${c.email}" style="color:inherit;font-weight:500">${c.email}</a></p><div class="links">${links}</div>`;
 }
-let lastFocus = null;
+let lastFocus = null, currentContent = null;
+const lockBody = () => document.body.classList.toggle("locked",
+  backdrop.classList.contains("open") || contactBackdrop.classList.contains("open") || cvBackdrop.classList.contains("open"));
+function showList(){
+  const c = currentContent;
+  const body = c.kind === "projects" ? projectsHTML(c) : c.kind === "about" ? aboutHTML(c) : contactHTML(c);
+  inner.innerHTML = `<div class="head"><h2 id="ptitle">${c.title}</h2><p class="tag">${c.intro || ""}</p></div>${body}`;
+  panel.classList.remove("detailing"); inner.scrollTop = 0;
+  inner.querySelectorAll(".card").forEach(b => b.addEventListener("click", () => showProject(+b.dataset.i)));
+}
+function showProject(i){
+  inner.innerHTML = projectHTML(currentContent.projects[i]);
+  panel.classList.add("detailing"); inner.scrollTop = 0;
+  document.getElementById("back").focus({ preventScroll: true });
+}
 function openWindow(h){
   const c = content[h.id]; if (!c) return;
-  const body = c.kind === "projects" ? projectsHTML(c) : c.kind === "about" ? aboutHTML(c) : contactHTML(c);
-  inner.innerHTML = `<h2 id="ptitle">${c.title}</h2><p class="tag">${c.intro || ""}</p>${body}`;
-  inner.querySelectorAll(".more").forEach(b => b.addEventListener("click", () => {
-    const art = b.closest(".project"), open = art.classList.toggle("open");
-    b.setAttribute("aria-expanded", open); b.textContent = open ? "Less" : "More";
-    if (open) setTimeout(() => art.scrollIntoView({ behavior:"smooth", block:"start" }), 60);
-  }));
+  currentContent = c; showList();
   lastFocus = document.activeElement;
-  backdrop.classList.add("open"); document.body.classList.add("locked");
-  panel.scrollTop = 0; document.getElementById("close").focus();
+  backdrop.classList.add("open"); lockBody();
+  document.getElementById("close").focus({ preventScroll: true });
   showPose(h.pose);
 }
 function closeWindow(){
-  backdrop.classList.remove("open"); document.body.classList.remove("locked");
+  backdrop.classList.remove("open"); lockBody();
   showPose("idle"); if (lastFocus) lastFocus.focus();
 }
+document.getElementById("back").addEventListener("click", showList);
 const lightbox = document.getElementById("lightbox"), lightboxImg = lightbox.querySelector("img");
 inner.addEventListener("click", e => {
-  const img = e.target.closest(".thumb img, .media img"); if (!img) return;
+  const img = e.target.closest(".lead img, .media img"); if (!img) return;
   lightboxImg.src = img.currentSrc || img.src; lightboxImg.alt = img.alt; lightbox.classList.add("open");
 });
 lightbox.addEventListener("click", () => lightbox.classList.remove("open"));
-// --- CV ---
+// --- CV (opened from the contact page) ---
 const cvBackdrop = document.getElementById("cvBackdrop");
 document.getElementById("cvPages").innerHTML = cvInfo.pages.map(src => `<img src="${encodeURI(src)}" alt="Ignacio Villanueva, CV">`).join("");
-const cvDownload = document.getElementById("cvDownload"); cvDownload.href = encodeURI(cvInfo.pdf); cvDownload.setAttribute("download", cvInfo.name);
+for (const id of ["cvDownload", "cvDownloadContact"]){
+  const a = document.getElementById(id); a.href = encodeURI(cvInfo.pdf); a.setAttribute("download", cvInfo.name);
+}
+let cvFocus = null;
 function openCV(){
-  lastFocus = document.activeElement; cvOpen = true; render();          // the CV on the desk disappears…
-  cvBackdrop.classList.add("open"); cvBackdrop.setAttribute("aria-hidden", "false"); document.body.classList.add("locked");
+  cvFocus = document.activeElement;
+  cvBackdrop.classList.add("open"); cvBackdrop.setAttribute("aria-hidden", "false"); lockBody();
   setTimeout(() => document.getElementById("cvClose").focus({ preventScroll: true }), 120);
 }
 function closeCV(){
-  cvBackdrop.classList.remove("open"); cvBackdrop.setAttribute("aria-hidden", "true"); document.body.classList.remove("locked");
-  cvOpen = false; render();                                             // …and comes back when you leave
-  if (lastFocus) lastFocus.focus();
+  cvBackdrop.classList.remove("open"); cvBackdrop.setAttribute("aria-hidden", "true"); lockBody();
+  if (cvFocus) cvFocus.focus();
 }
 document.getElementById("cvClose").addEventListener("click", closeCV);
+document.getElementById("openCV").addEventListener("click", openCV);
 cvBackdrop.addEventListener("click", e => { if (e.target === cvBackdrop) closeCV(); });
 
 // --- contact page ---
@@ -591,13 +652,14 @@ contactEmailEl.textContent = contactInfo.email; contactEmailEl.href = "mailto:" 
 document.getElementById("contactLinkedin").href = contactInfo.linkedin;
 function openContact(){
   lastFocus = document.activeElement;
-  contactBackdrop.classList.add("open"); contactBackdrop.setAttribute("aria-hidden", "false"); document.body.classList.add("locked");
+  contactBackdrop.classList.add("open"); contactBackdrop.setAttribute("aria-hidden", "false"); lockBody();
   setTimeout(() => document.getElementById("contactClose").focus({ preventScroll: true }), 120);
 }
 function closeContact(){
-  contactBackdrop.classList.remove("open"); contactBackdrop.setAttribute("aria-hidden", "true"); document.body.classList.remove("locked");
+  contactBackdrop.classList.remove("open"); contactBackdrop.setAttribute("aria-hidden", "true"); lockBody();
   copyBtn.textContent = "Copy email"; if (lastFocus) lastFocus.focus();
 }
+document.getElementById("contactTab").addEventListener("click", () => { if (!editing) openContact(); });
 document.getElementById("contactClose").addEventListener("click", closeContact);
 contactBackdrop.addEventListener("click", e => { if (e.target === contactBackdrop) closeContact(); });
 copyBtn.addEventListener("click", async () => {
@@ -629,7 +691,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && contactOpen && !lightbox.classList.contains("open")) return closeContact();
   const open = backdrop.classList.contains("open") || contactOpen || cvIsOpen;
   if (e.key === "Escape" && lightbox.classList.contains("open")) return lightbox.classList.remove("open");
-  if (e.key === "Escape" && open) return closeWindow();
+  if (e.key === "Escape" && open) return panel.classList.contains("detailing") ? showList() : closeWindow();
   if ((e.key === "e" || e.key === "E") && !open && !e.ctrlKey && !e.metaKey && e.target.tagName !== "INPUT") return toggleEdit();
   if (!editing || !selected || e.target.tagName === "INPUT") return;
   const step = e.shiftKey ? 0.5 : 0.1, rstep = e.shiftKey ? 0.1 : 0.5;
