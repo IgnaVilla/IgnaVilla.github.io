@@ -236,7 +236,7 @@ body.locked{ overflow:hidden; }
   transition:opacity .25s ease, transform .35s cubic-bezier(.3,1.4,.5,1); }
 .about.open .ab-main{ opacity:1; transform:none; transition-delay:.15s; }
 .ab-main img{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-.ab-text{ position:absolute; left:9%; right:13%; top:11%; bottom:21%; display:flex; align-items:center; justify-content:center; text-align:center;
+.ab-text{ position:absolute; left:6%; right:21.4%; top:22.6%; bottom:13.2%; display:flex; align-items:center; justify-content:center; text-align:center;
   font-family:"Caveat","Segoe Script",cursive; font-weight:700; line-height:1.1; color:#1c2a33; font-size:4.6cqh; }
 .ab-ans{ position:absolute; padding:0; border:0; background:none; cursor:pointer; opacity:0; transform:scale(.2); pointer-events:none;
   transition:opacity .25s ease, transform .35s cubic-bezier(.3,1.4,.5,1); }
@@ -424,7 +424,8 @@ const highlights = {
 const hotspots = [
   { id: "writing", label: "Writing",     pose: "left",   left: 12,   top: 32.5, width: 23,   height: 25.5, rotate: -7 },
   { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
-  { id: "about",   label: "About me",    pose: "idle",   left: 33.5, top: 52,   width: 34.5, height: 48,   rotate: 0 },   // click Ignacio: the About me dialogue
+  { id: "about",      label: "About me (head)", pose: "idle", left: 45.1, top: 50.3, width: 11.7, height: 21.7, rotate: 0 },   // click Ignacio's head: the About me dialogue
+  { id: "about-body", label: "About me (body)", pose: "idle", left: 33.9, top: 71.7, width: 36.2, height: 28.3, rotate: 0 },   // …or his body
   { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
 ];
 
@@ -672,7 +673,7 @@ for (const h of hotspots){
   b.addEventListener("pointerleave", () => { if (!editing) { showPose("idle"); speedUpWord(null); } });
   b.addEventListener("focus", () => { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); });
   b.addEventListener("blur", () => { showPose("idle"); speedUpWord(null); });
-  b.addEventListener("click", () => { if (editing) select(h); else if (h.id === "about") openAbout(); else openWindow(h); });
+  b.addEventListener("click", () => { if (editing) select(h); else if (h.id.startsWith("about")) openAbout(); else openWindow(h); });
 }
 
 // --- windows ---
@@ -880,7 +881,8 @@ aboutEl.addEventListener("click", e => { if (!e.target.closest(".about-x, .ab-an
 abWorld.addEventListener("click", e => {
   const btn = e.target.closest(".ab-ans"); if (!btn) return;
   abWorld.querySelectorAll(".ab-ans").forEach(b => b.classList.toggle("chosen", b === btn));
-  abMode = "answer"; abQueue = ABOUT.topics[+btn.dataset.i].lines.map(t => ({ t, pose: "chill" }));
+  abMode = "answer"; aboutEl.classList.remove("asking");              // the question bubbles hide until the answer is finished
+  abQueue = ABOUT.topics[+btn.dataset.i].lines.map(t => ({ t, pose: "chill" }));
   abSay(abQueue.shift());
 });
 document.getElementById("aboutX").addEventListener("click", closeAbout);   // the X is the only way out
