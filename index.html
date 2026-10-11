@@ -247,15 +247,18 @@ body.locked{ overflow:hidden; }
 .ab-ans img{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
 .ab-ans span{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 6%;
   font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:3.7cqh; line-height:1; color:#1c2a33; pointer-events:none; }
-.about-x{ position:fixed; z-index:2; top:11vh; right:4.2vw; width:clamp(44px,5.4vw,78px); height:clamp(44px,5.4vw,78px); padding:0; border-radius:50%;
+/* the X sits at a fixed place of the desk picture (76.6 % across, 26.5 % down), so it keeps its place whatever the window size */
+.about-x{ position:fixed; z-index:2; left:calc(50vw + var(--h) * .568); top:calc((100vh - var(--h)) / 2 + var(--h) * .265); transform:translate(-50%,-50%);
+  width:max(44px, calc(var(--h) * .105)); height:max(44px, calc(var(--h) * .105)); padding:0; border-radius:50%;
   border:3px solid #1D2833; background:#C4223F; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.4); transition:transform .15s ease; }
 .about-x::before, .about-x::after{ content:""; position:absolute; left:50%; top:50%; width:52%; height:6%; margin:-3% 0 0 -26%; background:#1D2833; border-radius:3px; transform:rotate(45deg); }
 .about-x::after{ transform:rotate(-45deg); }
-.about-x:hover, .about-x:focus-visible{ transform:scale(1.1); outline:none; }
+.about-x:hover, .about-x:focus-visible{ transform:translate(-50%,-50%) scale(1.1); outline:none; }
 @media (max-aspect-ratio:13/10){
   /* tall windows (phones): the dialogue gets its own layout, measured on the window instead of on the desk picture */
   .about-world{ position:absolute; inset:0; width:auto; height:auto; }
-  .about-x{ top:10px; right:10px; width:44px; height:44px; }
+  .about-x{ left:auto; right:10px; top:10px; transform:none; width:44px; height:44px; }
+  .about-x:hover, .about-x:focus-visible{ transform:scale(1.1); }
   .ab-person{ left:auto; right:-3%; top:auto; bottom:0; height:40%; width:auto; aspect-ratio:730/1050; }
   .ab-main{ left:4%; top:9%; width:92%; height:33%; }
   .ab-text{ font-size:7.4cqw; }
