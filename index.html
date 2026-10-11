@@ -650,14 +650,14 @@ for (const name in poses) addLayer(poses[name], name);
 const highlightLayers = [];
 for (const name in highlights) highlightLayers.push(addLayer(highlights[name], name));
 
-let tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
+let aboutOpen = false, tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function speedUpWord(hotspotId){
   for (const name in layers) layerByName[name].step = SLOW;
   if (hotspotId && WORD_OF[hotspotId]) layerByName[WORD_OF[hotspotId]].step = FAST;
 }
 function render(){
   for (const L of animated){
-    const visible = !L.pose || L.pose === currentPose;
+    const visible = (!L.pose || L.pose === currentPose) && !(aboutOpen && L.pose);   // the photos of Ignacio on the desk hide while the About me is open
     L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === L.n % L.frames.length));
   }
 }
@@ -879,11 +879,13 @@ function openAbout(){
   lastFocus = document.activeElement;
   abQueue = ABOUT.intro.slice(); abMode = "intro"; aboutEl.classList.remove("asking");
   aboutEl.classList.add("open"); aboutEl.setAttribute("aria-hidden", "false"); lockBody();
+  aboutOpen = true; render();
   abSay(abQueue.shift());
   setTimeout(() => document.getElementById("aboutX").focus({ preventScroll: true }), 150);
 }
 function closeAbout(){
   aboutEl.classList.remove("open", "asking"); aboutEl.setAttribute("aria-hidden", "true"); lockBody();
+  aboutOpen = false; render();
   if (lastFocus) lastFocus.focus();
 }
 aboutEl.addEventListener("click", e => { if (!e.target.closest(".about-x, .ab-ans")) abNext(); });   // click anywhere = next line
