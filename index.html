@@ -223,6 +223,49 @@ body.locked{ overflow:hidden; }
 .cv-pages{ overflow-y:auto; overscroll-behavior:contain; background:#fff; }
 .cv-pages img{ display:block; width:100%; height:auto; }
 
+/* ─── About me: Ignacio talks in a speech bubble over the darkened desk ──── */
+.about{ position:fixed; inset:0; z-index:58; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; user-select:none;
+  visibility:hidden; background:rgba(8,40,50,0); transition:background .45s ease, visibility 0s linear .5s; }
+.about.open{ visibility:visible; background:rgba(8,40,50,.6); transition:background .45s ease, visibility 0s; }
+/* same box as the desk picture (3417×1600), so everything lines up with it */
+.about-world{ position:relative; flex:none; height:var(--h); width:calc(var(--h) * 3417 / 1600); container-type:size; }
+.ab-person{ position:absolute; left:57.36%; top:34.375%; width:21.36%; height:65.625%; opacity:0; transform:translateX(5%); pointer-events:none;
+  transition:opacity .3s ease, transform .45s cubic-bezier(.22,.9,.3,1); }
+.ab-person.on{ opacity:1; transform:none; }
+.ab-main{ position:absolute; left:33.95%; top:12.625%; width:29.47%; height:35.19%; opacity:0; transform:scale(.5); transform-origin:92% 96%; pointer-events:none;
+  transition:opacity .25s ease, transform .35s cubic-bezier(.3,1.4,.5,1); }
+.about.open .ab-main{ opacity:1; transform:none; transition-delay:.15s; }
+.ab-main img{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.ab-text{ position:absolute; left:9%; right:13%; top:11%; bottom:21%; display:flex; align-items:center; justify-content:center; text-align:center;
+  font-family:"Caveat","Segoe Script",cursive; font-weight:700; line-height:1.1; color:#1c2a33; font-size:4.6cqh; }
+.ab-ans{ position:absolute; padding:0; border:0; background:none; cursor:pointer; opacity:0; transform:scale(.2); pointer-events:none;
+  transition:opacity .25s ease, transform .35s cubic-bezier(.3,1.4,.5,1); }
+.about.asking .ab-ans{ opacity:1; transform:none; pointer-events:auto; }
+.about.asking .ab-ans:nth-of-type(2){ transition-delay:.08s; } .about.asking .ab-ans:nth-of-type(3){ transition-delay:.16s; } .about.asking .ab-ans:nth-of-type(4){ transition-delay:.24s; }
+.about.asking .ab-ans:hover, .about.asking .ab-ans:focus-visible{ transform:scale(1.08) rotate(-1.5deg); transition-delay:0s; outline:none; }
+.ab-ans.chosen::after{ content:""; position:absolute; inset:-6%; border:.5cqh dashed #3E8FB8; border-radius:14%; pointer-events:none; }
+.ab-ans img{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+.ab-ans span{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 6%;
+  font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:3.7cqh; line-height:1; color:#1c2a33; pointer-events:none; }
+.about-x{ position:fixed; z-index:2; top:clamp(10px,2vh,26px); right:clamp(10px,2vw,30px); width:clamp(44px,5vw,66px); height:clamp(44px,5vw,66px); padding:0; border-radius:50%;
+  border:3px solid #1D2833; background:#C4223F; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.4); transition:transform .15s ease; }
+.about-x::before, .about-x::after{ content:""; position:absolute; left:50%; top:50%; width:52%; height:6%; margin:-3% 0 0 -26%; background:#1D2833; border-radius:3px; transform:rotate(45deg); }
+.about-x::after{ transform:rotate(-45deg); }
+.about-x:hover, .about-x:focus-visible{ transform:scale(1.1); outline:none; }
+@media (max-aspect-ratio:13/10){
+  /* tall windows (phones): the dialogue gets its own layout, measured on the window instead of on the desk picture */
+  .about-world{ position:absolute; inset:0; width:auto; height:auto; }
+  .ab-person{ left:auto; right:-3%; top:auto; bottom:0; height:40%; width:auto; aspect-ratio:730/1050; }
+  .ab-main{ left:4%; top:9%; width:92%; height:33%; }
+  .ab-text{ font-size:7.4cqw; }
+  .ab-ans{ width:44% !important; height:7.5% !important; }
+  .ab-ans span{ font-size:6.6cqw; }
+  .ab-ans[data-i="0"]{ left:4% !important; top:46% !important; }
+  .ab-ans[data-i="1"]{ left:52% !important; top:46% !important; }
+  .ab-ans[data-i="2"]{ left:4% !important; top:55% !important; }
+  .ab-ans[data-i="3"]{ left:52% !important; top:55% !important; }
+}
+
 /* ─── edit mode (press E) ─────────────────────────────────────── */
 body.editing .hotspot{ cursor:move; }
 body.editing .hotspot::before{ box-shadow:inset 0 0 0 2px var(--accent), 0 0 0 1px rgba(0,0,0,.5); background:color-mix(in srgb,var(--accent) 16%,transparent); }
@@ -303,6 +346,16 @@ body.editing .editbar{ display:block; }
   </section>
 </div>
 
+<div class="about" id="about" role="dialog" aria-modal="true" aria-label="About me" aria-hidden="true">
+  <div class="about-world" id="aboutWorld">
+    <img class="ab-person" data-pose="intro" alt="Ignacio">
+    <img class="ab-person" data-pose="chill" alt="">
+    <img class="ab-person" data-pose="question" alt="">
+    <div class="ab-main" id="abMain"><img alt=""><div class="ab-text" id="abText"></div></div>
+  </div>
+  <button type="button" class="about-x" id="aboutX" aria-label="Close"></button>
+</div>
+
 <div class="lightbox" id="lightbox">
   <button type="button" class="lb-arrow lb-prev" id="lbPrev" aria-label="Previous image"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M46 8 L46 56 L10 32 Z" /></svg></button>
   <img alt="">
@@ -371,6 +424,7 @@ const highlights = {
 const hotspots = [
   { id: "writing", label: "Writing",     pose: "left",   left: 12,   top: 32.5, width: 23,   height: 25.5, rotate: -7 },
   { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
+  { id: "about",   label: "About me",    pose: "idle",   left: 33.5, top: 52,   width: 34.5, height: 48,   rotate: 0 },   // click Ignacio: the About me dialogue
   { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
 ];
 
@@ -618,7 +672,7 @@ for (const h of hotspots){
   b.addEventListener("pointerleave", () => { if (!editing) { showPose("idle"); speedUpWord(null); } });
   b.addEventListener("focus", () => { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); });
   b.addEventListener("blur", () => { showPose("idle"); speedUpWord(null); });
-  b.addEventListener("click", () => { if (editing) select(h); else openWindow(h); });
+  b.addEventListener("click", () => { if (editing) select(h); else if (h.id === "about") openAbout(); else openWindow(h); });
 }
 
 // --- windows ---
@@ -672,7 +726,7 @@ function contactHTML(c){
 }
 let lastFocus = null, currentContent = null;
 const lockBody = () => document.body.classList.toggle("locked",
-  backdrop.classList.contains("open") || contactBackdrop.classList.contains("open") || cvBackdrop.classList.contains("open"));
+  backdrop.classList.contains("open") || contactBackdrop.classList.contains("open") || cvBackdrop.classList.contains("open") || aboutEl.classList.contains("open"));
 function showList(){
   const c = currentContent;
   const body = c.kind === "projects" ? projectsHTML(c) : c.kind === "about" ? aboutHTML(c) : contactHTML(c);
@@ -752,6 +806,86 @@ inner.addEventListener("click", e => {
 for (const ev of ["play", "pause", "ended"]) inner.addEventListener(ev, e => {
   const box = e.target.closest && e.target.closest(".vbox"); if (box) box.classList.toggle("playing", ev === "play");
 }, true);
+// --- About me ---
+// Edit the words here. Each line is one click; "ask" is shown when the visitor may pick a question.
+const ABOUT = {
+  intro: [
+    { t: "Hi!", pose: "intro" },
+    { t: "I'm Ignacio. A future Game Designer.", pose: "intro" },
+    { t: "This is my About Me section, where you can learn a little about me.", pose: "chill" },
+  ],
+  ask: { t: "Is there anything that you want to know?", pose: "question" },
+  // box = the answer bubble's place in the 3417×1600 picture: [left, top, right, bottom] in pixels
+  topics: [
+    { label: "JOURNEY", box: [748, 388, 1128, 568], lines: [
+      "I have a degree in Industrial Design Engineering.",
+      "My goal from the beginning was not only to graduate, but also to prepare myself to enter the world of video games.",
+      "Currently, I am studying Game Design at Howest, driven by the desire to learn as much as I can and become the best version of myself.",
+    ] },
+    { label: "GOAL", box: [832, 644, 1184, 816], lines: [
+      "My long-term goal is ambitious, but deeply meaningful to me.",
+      "I want to create a game that can help or even heal people struggling with mental health challenges.",
+    ] },
+    { label: "DESIGN VIEW", box: [1220, 772, 1568, 940], lines: [
+      "I try to be original in every mechanic I design, always aiming to create something new. I want to make games that are not only entertaining but also stay in players' memories and positively impact them.",
+    ] },
+    { label: "HOBBIES", box: [1636, 776, 1984, 956], lines: [
+      "My hobbies? You ask?",
+      "I spend most of my free time playing indies and reading,",
+      "and before going to sleep, I write some random stuff or work on my world-building.",
+      "But when I get the chance, I also like drawing, photography and climbing.",
+    ] },
+  ],
+};
+const AB = "Portfolio Images/AboutME/";
+const aboutEl = document.getElementById("about"), abText = document.getElementById("abText"), abWorld = document.getElementById("aboutWorld");
+const abPersons = Object.fromEntries([...abWorld.querySelectorAll(".ab-person")].map(i => [i.dataset.pose, i]));
+for (const k in abPersons) abPersons[k].src = encodeURI(AB + k + ".webp");
+abWorld.querySelector(".ab-main img").src = encodeURI(AB + "main-bubble.webp");
+ABOUT.topics.forEach((tp, n) => {                                   // one button per answer bubble
+  const [l, t, r, b] = tp.box, btn = document.createElement("button");
+  btn.type = "button"; btn.className = "ab-ans"; btn.dataset.i = n; btn.setAttribute("aria-label", tp.label);
+  btn.style.cssText = `left:${l / 34.17}%; top:${t / 16}%; width:${(r - l) / 34.17}%; height:${(b - t) / 16}%`;
+  btn.innerHTML = `<img src="${encodeURI(AB + "answer" + (n + 1) + ".webp")}" alt=""><span>${tp.label}</span>`;
+  abWorld.appendChild(btn);
+});
+let abQueue = [], abMode = "intro";
+function abFit(){                                                    // shrink long lines until they fit inside the bubble
+  abText.style.fontSize = "";
+  let size = parseFloat(getComputedStyle(abText).fontSize);
+  while ((abText.scrollHeight > abText.clientHeight + 1 || abText.scrollWidth > abText.clientWidth + 1) && size > 9){ size -= 1; abText.style.fontSize = size + "px"; }
+}
+function abSay(line){
+  abText.textContent = line.t; abFit();
+  for (const k in abPersons) abPersons[k].classList.toggle("on", k === line.pose);
+}
+function abAsk(){ abMode = "ask"; aboutEl.classList.add("asking"); abSay(ABOUT.ask); }
+function abNext(){
+  if (abQueue.length) abSay(abQueue.shift());
+  else if (abMode !== "ask") abAsk();                                // after the last line: back to the question
+}
+function openAbout(){
+  lastFocus = document.activeElement;
+  abQueue = ABOUT.intro.slice(); abMode = "intro"; aboutEl.classList.remove("asking");
+  abWorld.querySelectorAll(".ab-ans").forEach(b => b.classList.remove("chosen"));
+  aboutEl.classList.add("open"); aboutEl.setAttribute("aria-hidden", "false"); lockBody();
+  abSay(abQueue.shift());
+  setTimeout(() => document.getElementById("aboutX").focus({ preventScroll: true }), 150);
+}
+function closeAbout(){
+  aboutEl.classList.remove("open", "asking"); aboutEl.setAttribute("aria-hidden", "true"); lockBody();
+  if (lastFocus) lastFocus.focus();
+}
+aboutEl.addEventListener("click", e => { if (!e.target.closest(".about-x, .ab-ans")) abNext(); });   // click anywhere = next line
+abWorld.addEventListener("click", e => {
+  const btn = e.target.closest(".ab-ans"); if (!btn) return;
+  abWorld.querySelectorAll(".ab-ans").forEach(b => b.classList.toggle("chosen", b === btn));
+  abMode = "answer"; abQueue = ABOUT.topics[+btn.dataset.i].lines.map(t => ({ t, pose: "chill" }));
+  abSay(abQueue.shift());
+});
+document.getElementById("aboutX").addEventListener("click", closeAbout);   // the X is the only way out
+addEventListener("resize", () => { if (aboutEl.classList.contains("open")) abFit(); });
+
 // --- CV (opened from the contact page) ---
 const cvBackdrop = document.getElementById("cvBackdrop");
 document.getElementById("cvPages").innerHTML = cvInfo.pages.map(src => `<img src="${encodeURI(src)}" alt="Ignacio Villanueva, CV">`).join("");
@@ -831,6 +965,11 @@ function select(h){
 function changed(h){ apply(h); refreshTable(); printOut(); }
 
 document.addEventListener("keydown", e => {
+  if (aboutEl.classList.contains("open")){
+    if (e.target.closest && e.target.closest(".ab-ans, .about-x")) return;
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight"){ e.preventDefault(); abNext(); }
+    return;
+  }
   if (lightbox.classList.contains("open") && lbImages.length > 1 && (e.key === "ArrowLeft" || e.key === "ArrowRight")){ lbShow(lbIndex + (e.key === "ArrowRight" ? 1 : -1)); return; }
   const cvIsOpen = cvBackdrop.classList.contains("open");
   if (e.key === "Escape" && cvIsOpen) return closeCV();
