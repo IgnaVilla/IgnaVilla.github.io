@@ -68,6 +68,12 @@ body.locked{ overflow:hidden; }
 .contact-tab{ position:fixed; top:0; right:clamp(8px,1.6vw,32px); z-index:20; width:clamp(120px,15.5vw,300px); padding:0; border:0; background:none; cursor:pointer;
   transition:transform .18s ease; filter:drop-shadow(0 4px 8px rgba(0,0,0,.25)); }
 .contact-tab img{ display:block; width:100%; height:auto; }
+/* "?" note, top-left: press it and the clickable things light up for a moment */
+.help-tab{ position:fixed; top:0; left:clamp(8px,1.6vw,32px); z-index:20; width:clamp(78px,10.07vw,195px); padding:0; border:0; background:none; cursor:pointer;
+  transition:transform .18s ease; filter:drop-shadow(0 4px 8px rgba(0,0,0,.25)); }
+.help-tab img{ display:block; width:100%; height:auto; }
+.help-tab:hover, .help-tab:focus-visible{ transform:translateY(4px); }
+.help-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 .contact-tab:hover, .contact-tab:focus-visible{ transform:translateY(4px); }
 .contact-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
@@ -250,6 +256,7 @@ body.editing .editbar{ display:block; }
   </div>
 </main>
 
+<button class="help-tab" id="helpTab" aria-label="Show what I can click"><img src="Portfolio Images/FirstScreen/Question Tab.webp" alt=""></button>
 <button class="contact-tab" id="contactTab" aria-label="Contact me" aria-haspopup="dialog"><img src="Portfolio Images/FirstScreen/ContactMe Tab.webp" alt=""></button>
 
 <div class="editbar" id="editbar">
@@ -575,7 +582,8 @@ function addLayer(srcs, pose){
 const layerByName = {};
 for (const name in layers) layerByName[name] = addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
-for (const name in highlights) addLayer(highlights[name], name);
+const highlightLayers = [];
+for (const name in highlights) highlightLayers.push(addLayer(highlights[name], name));
 
 let tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function speedUpWord(hotspotId){
@@ -765,6 +773,19 @@ function closeContact(){
   contactBackdrop.classList.remove("open"); contactBackdrop.setAttribute("aria-hidden", "true"); lockBody();
   copyBtn.textContent = "Copy email"; if (lastFocus) lastFocus.focus();
 }
+// "?" — light up every clickable screen for half a second, then fade them out slowly
+let hintTimers = [];
+const HINT_HOLD = 500, HINT_FADE = 1400;                      // milliseconds
+function showHints(){
+  hintTimers.forEach(clearTimeout);
+  const imgs = highlightLayers.flatMap(L => L.frames);
+  for (const i of imgs){ i.style.transition = "none"; i.style.visibility = "visible"; i.style.opacity = "1"; }
+  hintTimers = [
+    setTimeout(() => { for (const i of imgs){ i.style.transition = `opacity ${HINT_FADE}ms ease`; i.style.opacity = "0"; } }, HINT_HOLD),
+    setTimeout(() => { for (const i of imgs){ i.style.transition = i.style.visibility = i.style.opacity = ""; } }, HINT_HOLD + HINT_FADE + 60),
+  ];
+}
+document.getElementById("helpTab").addEventListener("click", showHints);
 document.getElementById("contactTab").addEventListener("click", () => { if (!editing) openContact(); });
 document.getElementById("contactClose").addEventListener("click", closeContact);
 contactBackdrop.addEventListener("click", e => { if (e.target === contactBackdrop) closeContact(); });
