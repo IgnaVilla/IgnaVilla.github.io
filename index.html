@@ -143,6 +143,7 @@ body.locked{ overflow:hidden; }
   .back{ font-size:15px; }
 }
 .panel p{ margin:0 0 14px; max-width:68ch; font-size:17px; }
+.panel .detail p > b:first-child{ font-size:1.22em; }          /* the little title of each section */
 .panel .meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px 20px; margin:0 0 18px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--panel-ink) 6%,transparent); font-size:15px; }
 .panel .meta b{ display:block; font-weight:500; color:var(--panel-muted); font-size:13px; }
 .panel .media{ display:grid; gap:14px; margin:6px 0 0; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
@@ -646,6 +647,8 @@ function projectsHTML(c){
       </span>
     </button>`).join("")}</div>`;
 }
+// A paragraph that starts with a bold title ("The idea.", "Dialogue." ...) puts the title on its own line.
+const titled = t => t.replace(/^(<b>[^<]*<\/b>)\s+/, "$1<br>");
 // One project, open: everything about it.
 function projectHTML(p){
   return `<article class="detail">
@@ -653,8 +656,8 @@ function projectHTML(p){
     <p class="summary">${p.summary}</p>
     <div class="lead">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
-    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>`
-      : t.text ? `<div class="media figure split"><p>${t.text}</p><div>${mediaHTML(t, p.title + " screenshot")}</div></div>`
+    ${(p.details || []).map(t => typeof t === "string" ? `<p>${titled(t)}</p>`
+      : t.text ? `<div class="media figure split"><p>${titled(t.text)}</p><div>${mediaHTML(t, p.title + " screenshot")}</div></div>`
       : `<div class="media figure${t.size === "half" ? " half" : ""}">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
     ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
     ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
