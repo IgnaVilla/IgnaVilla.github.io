@@ -243,7 +243,8 @@ body.locked{ overflow:hidden; }
 .about.asking .ab-ans{ opacity:1; transform:none; pointer-events:auto; }
 .about.asking .ab-ans:nth-of-type(2){ transition-delay:.08s; } .about.asking .ab-ans:nth-of-type(3){ transition-delay:.16s; } .about.asking .ab-ans:nth-of-type(4){ transition-delay:.24s; }
 .about.asking .ab-ans:hover, .about.asking .ab-ans:focus-visible{ transform:scale(1.08) rotate(-1.5deg); transition-delay:0s; outline:none; }
-.ab-ans.chosen::after{ content:""; position:absolute; inset:-6%; border:.5cqh dashed #3E8FB8; border-radius:14%; pointer-events:none; }
+/* an answer that has already been read: greyer and more see-through (no outline) */
+.about.asking .ab-ans.done{ opacity:.5; filter:grayscale(1) brightness(.8); }
 .ab-ans img{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
 .ab-ans span{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 6%;
   font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:3.7cqh; line-height:1; color:#1c2a33; pointer-events:none; }
@@ -877,7 +878,6 @@ function abNext(){
 function openAbout(){
   lastFocus = document.activeElement;
   abQueue = ABOUT.intro.slice(); abMode = "intro"; aboutEl.classList.remove("asking");
-  abWorld.querySelectorAll(".ab-ans").forEach(b => b.classList.remove("chosen"));
   aboutEl.classList.add("open"); aboutEl.setAttribute("aria-hidden", "false"); lockBody();
   abSay(abQueue.shift());
   setTimeout(() => document.getElementById("aboutX").focus({ preventScroll: true }), 150);
@@ -889,7 +889,7 @@ function closeAbout(){
 aboutEl.addEventListener("click", e => { if (!e.target.closest(".about-x, .ab-ans")) abNext(); });   // click anywhere = next line
 abWorld.addEventListener("click", e => {
   const btn = e.target.closest(".ab-ans"); if (!btn) return;
-  abWorld.querySelectorAll(".ab-ans").forEach(b => b.classList.toggle("chosen", b === btn));
+  btn.classList.add("done");                                          // remembered while the page stays open
   abMode = "answer"; aboutEl.classList.remove("asking");              // the question bubbles hide until the answer is finished
   abQueue = ABOUT.topics[+btn.dataset.i].lines.map(t => ({ t, pose: "chill" }));
   abSay(abQueue.shift());
