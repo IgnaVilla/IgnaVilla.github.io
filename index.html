@@ -229,7 +229,7 @@ body.locked{ overflow:hidden; }
 .about.open{ visibility:visible; background:rgba(8,40,50,.6); transition:background .45s ease, visibility 0s; }
 /* same box as the desk picture (3417×1600), so everything lines up with it */
 .about-world{ position:relative; flex:none; height:var(--h); width:calc(var(--h) * 3417 / 1600); container-type:size; }
-.ab-person{ position:absolute; left:57.36%; top:34.375%; width:21.36%; height:65.625%; opacity:0; transform:translateX(5%); pointer-events:none;
+.ab-person{ position:absolute; left:57.36%; top:34.375%; width:22.24%; height:65.625%; opacity:0; transform:translateX(5%); pointer-events:none;
   transition:opacity .3s ease, transform .45s cubic-bezier(.22,.9,.3,1); }
 .ab-person.on{ opacity:1; transform:none; }
 .ab-main{ position:absolute; left:33.95%; top:12.625%; width:29.47%; height:35.19%; opacity:0; transform:scale(.5); transform-origin:92% 96%; pointer-events:none;
@@ -250,17 +250,15 @@ body.locked{ overflow:hidden; }
   font-family:"Caveat","Segoe Script",cursive; font-weight:700; font-size:3.7cqh; line-height:1; color:#1c2a33; pointer-events:none; }
 /* the X sits at a fixed place of the desk picture (76.6 % across, 26.5 % down), so it keeps its place whatever the window size */
 .about-x{ position:fixed; z-index:2; left:calc(50vw + var(--h) * .568); top:calc((100vh - var(--h)) / 2 + var(--h) * .265); transform:translate(-50%,-50%);
-  width:max(44px, calc(var(--h) * .105)); height:max(44px, calc(var(--h) * .105)); padding:0; border-radius:50%;
-  border:3px solid #1D2833; background:#C4223F; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.4); transition:transform .15s ease; }
-.about-x::before, .about-x::after{ content:""; position:absolute; left:50%; top:50%; width:52%; height:6%; margin:-3% 0 0 -26%; background:#1D2833; border-radius:3px; transform:rotate(45deg); }
-.about-x::after{ transform:rotate(-45deg); }
+  width:max(44px, calc(var(--h) * .105)); height:max(44px, calc(var(--h) * .105)); padding:0; border:0; background:url("Portfolio Images/AboutME/exit.webp") center / contain no-repeat; cursor:pointer;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.4)); transition:transform .15s ease; }
 .about-x:hover, .about-x:focus-visible{ transform:translate(-50%,-50%) scale(1.1); outline:none; }
 @media (max-aspect-ratio:13/10){
   /* tall windows (phones): the dialogue gets its own layout, measured on the window instead of on the desk picture */
   .about-world{ position:absolute; inset:0; width:auto; height:auto; }
   .about-x{ left:auto; right:10px; top:10px; transform:none; width:44px; height:44px; }
   .about-x:hover, .about-x:focus-visible{ transform:scale(1.1); }
-  .ab-person{ left:auto; right:-3%; top:auto; bottom:0; height:40%; width:auto; aspect-ratio:730/1050; }
+  .ab-person{ left:auto; right:-3%; top:auto; bottom:0; height:40%; width:auto; aspect-ratio:760/1050; }
   .ab-main{ left:4%; top:9%; width:92%; height:33%; }
   .ab-text{ font-size:7.4cqw; }
   .ab-ans{ width:44% !important; height:7.5% !important; }
@@ -356,6 +354,7 @@ body.editing .editbar{ display:block; }
     <img class="ab-person" data-pose="intro" alt="Ignacio">
     <img class="ab-person" data-pose="chill" alt="">
     <img class="ab-person" data-pose="question" alt="">
+    <img class="ab-person" data-pose="wondering" alt="">
     <div class="ab-main" id="abMain"><img alt=""><div class="ab-text" id="abText"></div></div>
   </div>
   <button type="button" class="about-x" id="aboutX" aria-label="Close"></button>
@@ -818,12 +817,13 @@ for (const ev of ["play", "pause", "ended"]) inner.addEventListener(ev, e => {
   const box = e.target.closest && e.target.closest(".vbox"); if (box) box.classList.toggle("playing", ev === "play");
 }, true);
 // --- About me ---
-// Edit the words here. Each line is one click; "ask" is shown when the visitor may pick a question.
+// Edit the words here. Each line is one click. A line is a string, or { t, pose } to show another picture of Ignacio
+// (poses: "chill" = the normal one, "intro", "question", "wondering").
 const ABOUT = {
   intro: [
-    { t: "Hi!", pose: "intro" },
-    { t: "I'm Ignacio. A future Game Designer.", pose: "intro" },
-    { t: "This is my About Me section, where you can learn a little about me.", pose: "chill" },
+    { t: "Hi!" },
+    { t: "I'm Ignacio. A future Game Designer." },
+    { t: "This is my About Me section, where you can learn a little about me.", pose: "intro" },
   ],
   ask: { t: "Is there anything that you want to know?", pose: "question" },
   // box = the answer bubble's place in the 3417×1600 picture: [left, top, right, bottom] in pixels
@@ -832,7 +832,7 @@ const ABOUT = {
       "I have a degree in Industrial Design Engineering.",
       "But I needed to express my creativity in a way that engineering didn't allow.",
       "I also realized that all the inventions and ideas I had belonged more to the realm of science fiction than to the real world.",
-      "And that I wouldn't be able to create my iron suit any time soon.",
+      { t: "And that I wouldn't be able to create my iron suit any time soon.", pose: "wondering" },
       "So I realized that my love for indie games was more than just a hobby.",
       "And that I could put in 200% without much effort.",
       "Currently, I am studying Game Design at Howest, driven by the desire to learn as much as I can and become the best version of myself.",
@@ -846,7 +846,7 @@ const ABOUT = {
       "I want to make games that are not only entertaining but also stay in players' memories and positively impact them.",
     ] },
     { label: "HOBBIES", box: [1636, 776, 1984, 956], lines: [
-      "My hobbies? You ask?",
+      { t: "My hobbies? You ask?", pose: "wondering" },
       "I spend most of my free time playing indies and reading,",
       "and before going to sleep, I write some random stuff or work on my world-building.",
       "But when I get the chance, I also like drawing, photography and climbing.",
@@ -873,7 +873,8 @@ function abFit(){                                                    // shrink l
 }
 function abSay(line){
   abText.textContent = line.t; abFit();
-  for (const k in abPersons) abPersons[k].classList.toggle("on", k === line.pose);
+  const pose = line.pose || "chill";                                  // Ignacio's normal picture is "chill"
+  for (const k in abPersons) abPersons[k].classList.toggle("on", k === pose);
 }
 function abAsk(){ abMode = "ask"; aboutEl.classList.add("asking"); abSay(ABOUT.ask); }
 function abNext(){
@@ -898,7 +899,7 @@ abWorld.addEventListener("click", e => {
   const btn = e.target.closest(".ab-ans"); if (!btn) return;
   btn.classList.add("done");                                          // remembered while the page stays open
   abMode = "answer"; aboutEl.classList.remove("asking");              // the question bubbles hide until the answer is finished
-  abQueue = ABOUT.topics[+btn.dataset.i].lines.map(t => ({ t, pose: "chill" }));
+  abQueue = ABOUT.topics[+btn.dataset.i].lines.map(l => typeof l === "string" ? { t: l } : l);
   abSay(abQueue.shift());
 });
 document.getElementById("aboutX").addEventListener("click", closeAbout);   // the X is the only way out
