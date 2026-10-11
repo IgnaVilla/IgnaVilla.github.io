@@ -417,6 +417,8 @@ const highlights = {
   center: [ encodeURI(IMG + "Highlight Midle" + EXT) ],
   right:  [ encodeURI(IMG + "Highlight Right" + EXT) ],
 };
+// Outline of Ignacio himself (3 frames, same rhythm as his own animation), shown while the mouse is over him.
+const meHighlight = frames("Highlight Mee Midle");
 // A layer can have any number of frames (1 = static). To use 4 frames, change [1, 2, 3] above
 // to [1, 2, 3, 4]. You can also write a list by hand: ["Portfolio Images/FirstScreen/plant.png"].
 
@@ -429,8 +431,8 @@ const highlights = {
 const hotspots = [
   { id: "writing", label: "Writing",     pose: "left",   left: 12,   top: 32.5, width: 23,   height: 25.5, rotate: -7 },
   { id: "games",   label: "Game Design", pose: "center", left: 40.5, top: 29.5, width: 21.5, height: 19,   rotate: 0 },
-  { id: "about",      label: "About me (head)", pose: "idle", left: 45.1, top: 50.3, width: 11.7, height: 21.7, rotate: 0 },   // click Ignacio's head: the About me dialogue
-  { id: "about-body", label: "About me (body)", pose: "idle", left: 33.9, top: 71.7, width: 36.2, height: 28.3, rotate: 0 },   // …or his body
+  { id: "about",      label: "About me (head)", pose: "idle", hl: "me", left: 45.1, top: 50.3, width: 11.7, height: 21.7, rotate: 0 },   // click Ignacio's head: the About me dialogue
+  { id: "about-body", label: "About me (body)", pose: "idle", hl: "me", left: 33.9, top: 71.7, width: 36.2, height: 28.3, rotate: 0 },   // …or his body
   { id: "threed",  label: "3D",          pose: "right",  left: 66,   top: 32.5, width: 23,   height: 25.5, rotate: 7 },
 ];
 
@@ -649,15 +651,16 @@ for (const name in layers) layerByName[name] = addLayer(layers[name]);
 for (const name in poses) addLayer(poses[name], name);
 const highlightLayers = [];
 for (const name in highlights) highlightLayers.push(addLayer(highlights[name], name));
+const meLayer = addLayer(meHighlight, "me"); meLayer.hover = true; highlightLayers.push(meLayer);   // visible only while hovering Ignacio
 
-let aboutOpen = false, tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
+let activeHover = null, aboutOpen = false, tick = 0, currentPose = "idle", frameSeconds = FRAME_SECONDS, timer = null;
 function speedUpWord(hotspotId){
   for (const name in layers) layerByName[name].step = SLOW;
   if (hotspotId && WORD_OF[hotspotId]) layerByName[WORD_OF[hotspotId]].step = FAST;
 }
 function render(){
   for (const L of animated){
-    const visible = (!L.pose || L.pose === currentPose) && !(aboutOpen && L.pose);   // the photos of Ignacio on the desk hide while the About me is open
+    const visible = L.hover ? (activeHover === L.pose && !aboutOpen) : (!L.pose || L.pose === currentPose) && !(aboutOpen && L.pose);   // the photos of Ignacio on the desk hide while the About me is open
     L.frames.forEach((img, i) => img.classList.toggle("show", visible && i === L.n % L.frames.length));
   }
 }
@@ -674,10 +677,12 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) clear
 
 for (const h of hotspots){
   const b = els[h.id];
-  b.addEventListener("pointerenter", () => { if (!editing) { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); } });
-  b.addEventListener("pointerleave", () => { if (!editing) { showPose("idle"); speedUpWord(null); } });
-  b.addEventListener("focus", () => { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); });
-  b.addEventListener("blur", () => { showPose("idle"); speedUpWord(null); });
+  const hoverOn  = () => { activeHover = h.hl || null; releaseHint(h.hl || h.pose); showPose(h.pose); speedUpWord(h.id); render(); };
+  const hoverOff = () => { activeHover = null; showPose("idle"); speedUpWord(null); render(); };
+  b.addEventListener("pointerenter", () => { if (!editing) hoverOn(); });
+  b.addEventListener("pointerleave", () => { if (!editing) hoverOff(); });
+  b.addEventListener("focus", hoverOn);
+  b.addEventListener("blur", hoverOff);
   b.addEventListener("click", () => { if (editing) select(h); else if (h.id.startsWith("about")) openAbout(); else openWindow(h); });
 }
 
@@ -941,7 +946,7 @@ const HINT_HOLD = 500, HINT_FADE = 1400;                      // milliseconds
 const clearHint = i => { i.style.transition = i.style.visibility = i.style.opacity = ""; hintImgs.delete(i); };
 function showHints(){
   hintTimers.forEach(clearTimeout);
-  hintImgs = new Set(highlightLayers.flatMap(L => L.frames));
+  hintImgs = new Set(highlightLayers.map(L => L.frames[L.n % L.frames.length]));       // one frame per highlight (the current one)
   for (const i of hintImgs){ i.style.transition = "none"; i.style.visibility = "visible"; i.style.opacity = "1"; }
   hintTimers = [
     setTimeout(() => { for (const i of hintImgs){ i.style.transition = `opacity ${HINT_FADE}ms ease`; i.style.opacity = "0"; } }, HINT_HOLD),
