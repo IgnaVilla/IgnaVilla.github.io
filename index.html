@@ -45,9 +45,11 @@ body.locked{ overflow:hidden; }
 .world > #bg{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
 /* the 2560×1600 layers and the clickable areas sit in the middle of the wider background */
 .scene{ position:absolute; top:0; height:100%; left:12.643%; width:74.92%; user-select:none; }
-.scene img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
-.scene img.frame{ visibility:hidden; }
-.scene img.frame.show{ visibility:visible; }
+/* Pictures are drawn in the world. A 2560×1600 picture sits in the middle of it (same area as the clickable screens);
+   a picture that is as wide as the background (3417×1600) is detected by the script and gets the class "wide". */
+.world > img.frame{ position:absolute; top:0; height:100%; left:12.643%; width:74.92%; display:block; pointer-events:none; visibility:hidden; }
+.world > img.frame.wide{ left:0; width:100%; }
+.world > img.frame.show{ visibility:visible; }
 
 .hotspot{
   position:absolute; padding:0; margin:0; border:0; background:transparent; cursor:pointer;
@@ -70,17 +72,20 @@ body.locked{ overflow:hidden; }
 .contact-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
 /* ─── project window: lives inside the big screen picture ─────── */
-.backdrop{ position:fixed; inset:0; background:rgba(14,18,26,.32); backdrop-filter:blur(7px); display:none; align-items:center; justify-content:center; z-index:50; }
-.backdrop.open{ display:flex; }
+.backdrop{ position:fixed; inset:0; background:rgba(14,18,26,0); display:flex; align-items:center; justify-content:center; z-index:50; visibility:hidden;
+  transition:background .4s ease, backdrop-filter .4s ease, visibility 0s linear .6s; }
+.backdrop.open{ background:rgba(14,18,26,.32); backdrop-filter:blur(7px); visibility:visible; transition:background .4s ease, backdrop-filter .4s ease, visibility 0s; }
+.backdrop.open .screen{ transform:none; opacity:1; }
 @keyframes rise{ from{ transform:translateY(18px) scale(.985); opacity:0 } to{ transform:none; opacity:1 } }
-.screen{ position:relative; width:min(99vw, calc(99dvh * 2100 / 1323)); aspect-ratio:2100/1323; container-type:inline-size; animation:rise .3s ease-out;
+.screen{ position:relative; width:min(99vw, calc(99dvh * 2100 / 1280)); aspect-ratio:2100/1280; container-type:inline-size;
+  transform:var(--from, scale(.04)); opacity:0; transition:transform .55s cubic-bezier(.22,.9,.3,1), opacity .4s ease;
   --panel:#1F2A36; --panel-ink:#F2F2F0; --panel-muted:#B9C4CE; --line:rgba(255,255,255,.2); --title:#9CD2F2; color:var(--panel-ink); }
 .screen-frame{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
-.screen-x{ position:absolute; left:92.9%; top:2.6%; width:4.8%; height:7.8%; z-index:5; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; }
+.screen-x{ position:absolute; left:91.9%; top:2.9%; width:6%; height:9.1%; z-index:5; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; }
 .screen-x:hover{ background:rgba(255,255,255,.12); }
 .screen-x:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
 /* the glass area of the picture */
-.panel{ position:absolute; left:4.71%; right:3.5%; top:5.35%; bottom:10.3%; display:flex; flex-direction:column; overflow:hidden;
+.panel{ position:absolute; left:6.9%; right:7.7%; top:9%; bottom:10%; display:flex; flex-direction:column; overflow:hidden;
   font-size:clamp(14px,1.05cqw,18px); }
 .panel .inner{ flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-direction:column;
   padding:clamp(10px,1.8cqw,34px) clamp(16px,3.2cqw,56px) clamp(18px,2.6cqw,44px); }
@@ -168,7 +173,6 @@ body.locked{ overflow:hidden; }
 .panel .links-label{ align-self:center; font-weight:500; font-size:14px; letter-spacing:.04em; color:var(--panel-muted); }
 .panel .links a{ padding:10px 16px; border-radius:999px; border:1px solid var(--panel-ink); color:var(--panel-ink); text-decoration:none; font-weight:500; font-size:15px; }
 .panel .links a:hover{ background:var(--panel-ink); color:var(--panel); }
-@media (prefers-reduced-motion:reduce){ .screen{ animation:none } .scene img,.hotspot::before,.hotspot span,.card-img,.card-box,.card-hl,.contact-tab{ transition:none } }
 
 /* ─── contact page (slides up from the bottom) ────────────────── */
 .contact-backdrop{ position:fixed; inset:0; z-index:55; display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
@@ -188,13 +192,12 @@ body.locked{ overflow:hidden; }
   background:transparent; color:#1B2233; cursor:pointer; text-decoration:none; display:inline-block; }
 .contact-paper button:hover, .contact-paper .contact-link:hover, .contact-paper .contact-btn:hover{ background:#1B2233; color:#F4F1E8; }
 .contact-paper .contact-link{ display:block; width:fit-content; margin:.7em auto 0; font-size:1.15em; padding:.2em 1.6em; }
-.contact-paper .contact-cv-text{ margin-top:1.1em; margin-bottom:.3em; }
-.contact-cv{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin-top:.2em; }
+.contact-paper .contact-cv-text{ margin-top:1.1em; margin-bottom:.3em; text-align:center; }
+.contact-cv{ display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:.2em; }
 .contact-paper .cv-thumb{ display:block; width:clamp(130px,42%,230px); padding:0; border:0; border-radius:3px; background:none; cursor:zoom-in; box-shadow:0 8px 18px rgba(0,0,0,.28); transform:rotate(-1.2deg); transition:transform .18s ease; }
 .contact-paper .cv-thumb:hover, .contact-paper .cv-thumb:focus-visible{ background:none; transform:rotate(0) scale(1.03); outline:none; }
 .cv-thumb img{ display:block; width:100%; height:auto; border-radius:3px; }
 .contact-paper .contact-close{ position:absolute; top:clamp(34px,7%,56px); right:clamp(16px,6%,40px); width:2em; height:2em; padding:0; line-height:1.6em; text-align:center; font-size:.9em; }
-@media (prefers-reduced-motion:reduce){ .contact-paper, .contact-backdrop{ transition:none } }
 
 /* ─── CV (slides up to the middle of the screen) ──────────────── */
 .cv-backdrop{ position:fixed; inset:0; z-index:56; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;
@@ -210,7 +213,6 @@ body.locked{ overflow:hidden; }
 .cv-bar a:hover, .cv-bar button:hover{ background:var(--panel-ink); color:var(--panel); }
 .cv-pages{ overflow-y:auto; overscroll-behavior:contain; background:#fff; }
 .cv-pages img{ display:block; width:100%; height:auto; }
-@media (prefers-reduced-motion:reduce){ .cv-sheet, .cv-backdrop{ transition:none } }
 
 /* ─── edit mode (press E) ─────────────────────────────────────── */
 body.editing .hotspot{ cursor:move; }
@@ -561,7 +563,12 @@ const SLOW = 3, FAST = 1, WORD_OF = { writing: "writing", games: "gameDesign", t
 document.getElementById("bg").src = background;
 const animated = [];                      // { frames:[img,...], pose:null|poseName }
 function addLayer(srcs, pose){
-  const imgs = srcs.map(src => { const i = document.createElement("img"); i.className = "frame"; i.src = src; i.alt = ""; scene.insertBefore(i, scene.querySelector(".hotspot")); return i; });
+  const imgs = srcs.map(src => {
+    const i = document.createElement("img"); i.className = "frame"; i.alt = "";
+    const fit = () => i.classList.toggle("wide", i.naturalWidth / i.naturalHeight > 1.9);
+    i.addEventListener("load", fit); i.src = src; if (i.complete && i.naturalWidth) fit();
+    scene.parentElement.insertBefore(i, scene); return i;
+  });
   const layer = { frames: imgs, pose: pose || null, n: 0, step: SLOW };
   animated.push(layer); return layer;
 }
@@ -670,15 +677,26 @@ function showProject(i){
   panel.classList.add("detailing"); inner.scrollTop = 0;
   document.getElementById("back").focus({ preventScroll: true });
 }
+const screenEl = document.getElementById("screen");
+let openHotspot = null;
+// the big screen starts tiny, in the middle of the monitor that was clicked, and grows to its place
+function setScreenOrigin(h){
+  const r = els[h.id].getBoundingClientRect();
+  screenEl.style.transition = "none";                              // jump to the new starting point without animating
+  screenEl.style.setProperty("--from", `translate(${r.left + r.width / 2 - innerWidth / 2}px, ${r.top + r.height / 2 - innerHeight / 2}px) scale(.03)`);
+  void screenEl.offsetWidth; screenEl.style.transition = "";
+}
 function openWindow(h){
   const c = content[h.id]; if (!c) return;
-  currentContent = c; showList();
+  currentContent = c; showList(); openHotspot = h;
   lastFocus = document.activeElement;
+  setScreenOrigin(h);                                              // settle the starting point, then grow
   backdrop.classList.add("open"); lockBody();
   document.getElementById("close").focus({ preventScroll: true });
   showPose(h.pose);
 }
 function closeWindow(){
+  if (openHotspot) setScreenOrigin(openHotspot);                   // shrink back into the monitor
   backdrop.classList.remove("open"); lockBody();
   showPose("idle"); speedUpWord(null); if (lastFocus) lastFocus.focus();
 }
