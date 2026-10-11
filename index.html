@@ -149,7 +149,9 @@ body.locked{ overflow:hidden; }
 .panel .media img, .panel .media .video{ width:100%; border-radius:10px; display:block; max-width:100%; }
 .panel .media.figure{ margin:6px 0 20px; }
 .panel .media.figure.half{ width:50%; }
-@media (max-width:820px){ .panel .media.figure.half{ width:80%; } }
+.panel .media.figure.split{ display:grid; grid-template-columns:minmax(0,1fr) 42%; gap:clamp(14px,2.2cqw,36px); align-items:center; }
+.panel .media.figure.split p{ margin:0; }
+@media (max-width:820px){ .panel .media.figure.half{ width:80%; } .panel .media.figure.split{ grid-template-columns:1fr; } }
 .panel .media img{ cursor:zoom-in; }
 .todo{ color:var(--accent); }
 .lightbox{ position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(5,7,14,.88); cursor:zoom-out; }
@@ -435,6 +437,7 @@ const pitOut = {
     "<b>Weight and stamina.</b> I tried a heavier, more robust movement, with more impact frames on landing and slower motion, but testers found it boring and too slow. Now I want to create the illusion of weight with animation while keeping the same velocity. Standing still doesn't spend stamina, so you always have time to aim or rethink your path.",
     "<b>Level design.</b><br>Each level is a long vertical climb made of connected platforming challenges. No path is the wrong path, only harder or easier. At the end of each level there is a place to rest, like a village or a view, and then you choose which route to take next, sometimes without knowing if it is a good or a bad decision. Hidden paths and villages reward exploration, and light, sound and visual clues guide you to characters, minigames and story so nothing feels random. The sketch shows how a section combines jumps, climbs and explosions.",
     { image: encodeURI(GP + "image4.webp") },
+    { text: "<b>Progression.</b> Each level is built like a funnel: several routes at the top that merge into rest points and then branch again, so you are always choosing a path. Side areas and hidden villages reward exploring, and every level introduces one new system, taught step by step, so the challenge grows while you learn.", image: encodeURI(GP + "image5.webp") },
     "<b>Difficulty is a choice.</b> When I designed this game, my rule was that the player always has more than one path: if you get stuck, you can look for an easier route or push through the hard one, so frustration becomes almost a decision and beating a tough section feels earned. The difficulty then rises in three stages: the fall starts safe and ramps up fast, the climb keeps challenging you instead of letting your skills catch up, and the summit looks impossible but feels easier thanks to how far you have come. The hard part is making beginners and experts coexist on the same map.",
   ],
 };
@@ -475,6 +478,7 @@ const skyWindmill = {
   title: "Sky Windmill",
   summary: "A floating, wind-powered community that keeps to itself, far above the troubles of the world below.",
   thumb: { video: encodeURI(G3 + "SkyWIndmill/windmill.mp4"), poster: encodeURI(G3 + "SkyWIndmill/poster.webp") },
+  card:  { image: encodeURI(G3 + "SkyWIndmill/windmill1.webp") },   // box picture; the video plays on hover
   meta: { Modeling: "Blender", Texturing: "Substance Painter", Rendering: "Unity" },
   details: [
     "<b>The story.</b> With few resources in the sky, its people learned to harness the power of the wind. They like to keep their communities closed and spend their days sailing the skies, without needing to share a single word for years. They are a people who will do everything possible to stay out of the troubles of those who live beneath the clouds.",
@@ -609,9 +613,9 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) clear
 
 for (const h of hotspots){
   const b = els[h.id];
-  b.addEventListener("pointerenter", () => { if (!editing) { showPose(h.pose); speedUpWord(h.id); } });
+  b.addEventListener("pointerenter", () => { if (!editing) { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); } });
   b.addEventListener("pointerleave", () => { if (!editing) { showPose("idle"); speedUpWord(null); } });
-  b.addEventListener("focus", () => { showPose(h.pose); speedUpWord(h.id); });
+  b.addEventListener("focus", () => { releaseHint(h.pose); showPose(h.pose); speedUpWord(h.id); });
   b.addEventListener("blur", () => { showPose("idle"); speedUpWord(null); });
   b.addEventListener("click", () => { if (editing) select(h); else openWindow(h); });
 }
@@ -649,7 +653,9 @@ function projectHTML(p){
     <p class="summary">${p.summary}</p>
     <div class="lead">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
-    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>` : `<div class="media figure${t.size === "half" ? " half" : ""}">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
+    ${(p.details || []).map(t => typeof t === "string" ? `<p>${t}</p>`
+      : t.text ? `<div class="media figure split"><p>${t.text}</p><div>${mediaHTML(t, p.title + " screenshot")}</div></div>`
+      : `<div class="media figure${t.size === "half" ? " half" : ""}">${mediaHTML(t, p.title + " screenshot")}</div>`).join("")}
     ${(p.media || []).length ? `<div class="media">${p.media.map(m => mediaHTML(m, p.title + " screenshot")).join("")}</div>` : ""}
     ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON &rarr;</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
   </article>`;
@@ -773,17 +779,22 @@ function closeContact(){
   contactBackdrop.classList.remove("open"); contactBackdrop.setAttribute("aria-hidden", "true"); lockBody();
   copyBtn.textContent = "Copy email"; if (lastFocus) lastFocus.focus();
 }
-// "?" — light up every clickable screen for half a second, then fade them out slowly
-let hintTimers = [];
+// "?" — light up every clickable screen for half a second, then fade them out slowly.
+// Hovering a screen while it is fading cancels the fade for that screen: it behaves normally again.
+let hintTimers = [], hintImgs = new Set();
 const HINT_HOLD = 500, HINT_FADE = 1400;                      // milliseconds
+const clearHint = i => { i.style.transition = i.style.visibility = i.style.opacity = ""; hintImgs.delete(i); };
 function showHints(){
   hintTimers.forEach(clearTimeout);
-  const imgs = highlightLayers.flatMap(L => L.frames);
-  for (const i of imgs){ i.style.transition = "none"; i.style.visibility = "visible"; i.style.opacity = "1"; }
+  hintImgs = new Set(highlightLayers.flatMap(L => L.frames));
+  for (const i of hintImgs){ i.style.transition = "none"; i.style.visibility = "visible"; i.style.opacity = "1"; }
   hintTimers = [
-    setTimeout(() => { for (const i of imgs){ i.style.transition = `opacity ${HINT_FADE}ms ease`; i.style.opacity = "0"; } }, HINT_HOLD),
-    setTimeout(() => { for (const i of imgs){ i.style.transition = i.style.visibility = i.style.opacity = ""; } }, HINT_HOLD + HINT_FADE + 60),
+    setTimeout(() => { for (const i of hintImgs){ i.style.transition = `opacity ${HINT_FADE}ms ease`; i.style.opacity = "0"; } }, HINT_HOLD),
+    setTimeout(() => { [...hintImgs].forEach(clearHint); }, HINT_HOLD + HINT_FADE + 60),
   ];
+}
+function releaseHint(pose){                                    // the mouse is on the screen that owns this highlight
+  for (const L of highlightLayers) if (L.pose === pose) L.frames.forEach(clearHint);
 }
 document.getElementById("helpTab").addEventListener("click", showHints);
 document.getElementById("contactTab").addEventListener("click", () => { if (!editing) openContact(); });
