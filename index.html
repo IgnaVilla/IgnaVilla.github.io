@@ -472,7 +472,7 @@ const roboCoach = {
   details: [
     "<b>The story.</b> Robo Coach has passed from hand to hand, and has been abandoned more than once. Nobody kept him for long, but everyone left something behind. Every scratch, dent and faded mark on his body is a memory: a trace of the people who once relied on him, of the places he stood in, and of the hands that finally let him go. He cannot tell his past out loud, so he wears it.",
   ],
-  media: [ 1, 2, 3 ].map(n => ({ image: encodeURI(G3 + `Robo/robo${n}.webp`) })),
+  media: [ 1, 2, 3 ].map(n => ({ image: encodeURI(G3 + `Robo/robo${n}.webp`), full: encodeURI(G3 + `Robo/robo${n}-full.webp`) })),
 };
 const skyWindmill = {
   title: "Sky Windmill",
@@ -483,17 +483,17 @@ const skyWindmill = {
   details: [
     "<b>The story.</b> With few resources in the sky, its people learned to harness the power of the wind. They like to keep their communities closed and spend their days sailing the skies, without needing to share a single word for years. They are a people who will do everything possible to stay out of the troubles of those who live beneath the clouds.",
   ],
-  media: [ 1, 2, 3, 4 ].map(n => ({ image: encodeURI(G3 + `SkyWIndmill/windmill${n}.webp`) })),
+  media: [ 1, 2, 3, 4 ].map(n => ({ image: encodeURI(G3 + `SkyWIndmill/windmill${n}.webp`), full: encodeURI(G3 + `SkyWIndmill/windmill${n}-full.webp`) })),
 };
 const desk = {
   title: "Desk",
   summary: "A Frost Ogre's workshop, where he sculpts the human he loves again and again, because it is never perfect.",
-  thumb: { image: encodeURI(G3 + "Desk/desk2.webp") },
+  thumb: { image: encodeURI(G3 + "Desk/desk2.webp"), full: encodeURI(G3 + "Desk/desk2-full.webp") },
   meta: { Modeling: "Blender", Texturing: "Substance Painter", Lighting: "Unity" },
   details: [
     "<b>The story.</b> In the mountains lives a Frost Ogre who is in love with a human. He knows he can never be with her, but her beauty is so overwhelming that he can't stop sculpting her again and again. No matter how many times he carves her, he has to start over, because it is never perfect.",
   ],
-  media: [ 1, 3, 4, 5 ].map(n => ({ image: encodeURI(G3 + `Desk/desk${n}.webp`) })),
+  media: [ 1, 3, 4, 5 ].map(n => ({ image: encodeURI(G3 + `Desk/desk${n}.webp`), full: encodeURI(G3 + `Desk/desk${n}-full.webp`) })),
 };
 
 const GW = "Portfolio Images/Writing/";
@@ -626,7 +626,7 @@ function mediaHTML(m, alt){
   if (m.youtube !== undefined) return m.youtube
     ? `<div class="video"><iframe src="https://www.youtube.com/embed/${m.youtube}" title="${alt} video" allowfullscreen loading="lazy"></iframe></div>`
     : `<div class="placeholder video">Video</div>`;
-  return m.image ? `<img src="${m.image}" alt="${alt}" loading="lazy">` : `<div class="placeholder">Screenshot</div>`;
+  return m.image ? `<img src="${m.image}"${m.full ? ` data-full="${m.full}"` : ""} alt="${alt}" loading="lazy">` : `<div class="placeholder">Screenshot</div>`;
 }
 // A card's picture: card.image if given, else the video's poster, else the first screenshot.
 function cardImage(p){
@@ -720,6 +720,11 @@ let lbImages = [], lbIndex = 0;                                      // the pict
 function lbShow(i){
   lbIndex = (i + lbImages.length) % lbImages.length;
   const im = lbImages[lbIndex]; lightboxImg.src = im.currentSrc || im.src; lightboxImg.alt = im.alt;
+  if (im.dataset.full){                                          // full-quality twin (e.g. the 3D renders)
+    const big = new Image();
+    big.onload = () => { if (lbImages[lbIndex] === im) lightboxImg.src = big.src; };
+    big.src = im.dataset.full;
+  }
   document.getElementById("lbCount").textContent = `${lbIndex + 1} / ${lbImages.length}`;
 }
 inner.addEventListener("click", e => {
