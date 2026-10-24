@@ -126,7 +126,9 @@ body.locked{ overflow:hidden; }
 .detail .lead{ margin:0 0 1.2em; }
 .detail .lead img, .detail .lead .video{ aspect-ratio:16/9; width:100%; object-fit:cover; border-radius:10px; display:block; background:#000; }
 .detail .lead img{ cursor:zoom-in; }
-.detail .lead.small{ width:56%; margin-left:auto; margin-right:auto; }
+.detail .lead .embed{ aspect-ratio:16/9; }
+.detail .lead .embed iframe{ width:100%; height:100%; border:0; border-radius:10px; background:#fff; display:block; }
+.detail .lead.small{ width:70%; margin-left:auto; margin-right:auto; }
 .strip-wrap{ position:relative; margin:6px 0 22px; padding:0 3.2em; }
 .strip{ display:flex; gap:12px; overflow-x:auto; scroll-behavior:smooth; scrollbar-width:none; }
 .strip::-webkit-scrollbar{ display:none; }
@@ -602,6 +604,7 @@ const penumbra = {
   title: "Penumbra",
   summary: "In a world where shadows wake up and kill their owners, one man learns to live, and fight, alongside his.",
   thumb: { video: encodeURI(GW + "Penumbra/penumbra.mp4"), poster: encodeURI(GW + "Penumbra/poster.webp") },
+  lead: { iframe: "https://miro.com/app/live-embed/uXjVEVisZbQ=/?embedAutoplay=true", title: "Penumbra board on Miro" },   // the top of the page; the card still plays the video
   leadSize: "small",
   details: [
     "In a world where shadows wake up and start killing their owners, people start living underground to hide from the sun.",
@@ -610,7 +613,7 @@ const penumbra = {
     "<b>Laws of the Shadows.</b> I love spending hours and hours on the rules of a new \u201canomaly\u201d or magic: discovering how it works, how it mixes with reality, and how to make it feel real.",
     { strip: [ "Laws 0", "Laws 1", "Laws 2", "Laws 3", "Penumbra 2", "Penumbra 3" ].map(PN) },
     "<b>Lost Civilization.</b> A hidden civilization coexists with the shadows, and it holds the secret of why they woke up and of how to coexist with them. It is a self-sufficient lost city that never needs to leave its cave: it has its own crops and livestock, and its light comes from a mysterious tree.",
-    { strip: [ { iframe: "https://miro.com/app/live-embed/uXjVEVisZbQ=/?embedAutoplay=true", title: "Lost Civilization board on Miro" }, ...[ "Lost Civilization", "penumbra1", "penumbra2", "penumbra3" ].map(PN) ] },
+    { strip: [ { video: encodeURI(GW + "Penumbra/penumbra.mp4"), poster: encodeURI(GW + "Penumbra/poster.webp") }, ...[ "Lost Civilization", "penumbra1", "penumbra2", "penumbra3" ].map(PN) ] },
     "<b>Social Structure.</b> Almost all of humanity has died. But those who survived did so by hiding underground, being smarter than the sun, or giving in to madness. Here you can see a quick example of some of the groups that survived.",
     { strip: [ 0, 1, 2, 3 ].map(n => PN("Social Tructure " + n)) },
     "<b>Investigation.</b>",
@@ -751,7 +754,7 @@ function projectHTML(p){
   return `<article class="detail">
     <h2 id="ptitle">${p.title}</h2>
     <p class="summary">${p.summary}</p>
-    <div class="lead${p.leadSize === "small" ? " small" : ""}">${mediaHTML(p.thumb || { image: "" }, p.title)}</div>
+    <div class="lead${p.leadSize === "small" ? " small" : ""}">${mediaHTML(p.lead || p.thumb || { image: "" }, p.title)}</div>
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
     ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
     ${(p.details || []).map(t => typeof t === "string" ? `<p>${titled(t)}</p>`
