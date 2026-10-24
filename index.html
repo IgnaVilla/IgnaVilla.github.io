@@ -818,12 +818,12 @@ for (const ev of ["play", "pause", "ended"]) inner.addEventListener(ev, e => {
 }, true);
 // --- About me ---
 // Edit the words here. Each line is one click. A line is a string, or { t, pose } to show another picture of Ignacio
-// (poses: "chill" = the normal one, "intro", "question", "wondering").
+// (poses: "intro" = hands in pockets, the NORMAL one; "chill" = arms crossed; "question"; "wondering").
 const ABOUT = {
   intro: [
     { t: "Hi!" },
     { t: "I'm Ignacio. A future Game Designer." },
-    { t: "This is my About Me section, where you can learn a little about me.", pose: "intro" },
+    { t: "This is my About Me section, where you can learn a little about me.", pose: "chill" },
   ],
   ask: { t: "Is there anything that you want to know?", pose: "question" },
   // box = the answer bubble's place in the 3417×1600 picture: [left, top, right, bottom] in pixels
@@ -873,7 +873,7 @@ function abFit(){                                                    // shrink l
 }
 function abSay(line){
   abText.textContent = line.t; abFit();
-  const pose = line.pose || "chill";                                  // Ignacio's normal picture is "chill"
+  const pose = line.pose || "intro";                                  // Ignacio's normal picture: hands in his pockets
   for (const k in abPersons) abPersons[k].classList.toggle("on", k === pose);
 }
 function abAsk(){ abMode = "ask"; aboutEl.classList.add("asking"); abSay(ABOUT.ask); }
