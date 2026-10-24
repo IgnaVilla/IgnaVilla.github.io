@@ -549,7 +549,7 @@ const skyWindmill = {
   media: [ 1, 2, 3, 4 ].map(n => ({ image: encodeURI(G3 + `SkyWIndmill/windmill${n}.webp`), full: encodeURI(G3 + `SkyWIndmill/windmill${n}-full.webp`) })),
 };
 const desk = {
-  title: "Desk",
+  title: "Frost Stone Mason",
   summary: "A Frost Ogre's workshop, where he sculpts the human he loves again and again, because it is never perfect.",
   thumb: { image: encodeURI(G3 + "Desk/desk2.webp"), full: encodeURI(G3 + "Desk/desk2-full.webp") },
   meta: { Modeling: "Blender", Texturing: "Substance Painter", Lighting: "Unity" },
@@ -600,7 +600,7 @@ const grimoire = {
 
 const content = {
   // Project screenshots go in the matching folder, e.g. { image: "Portfolio Images/GameDesign/level-1.jpg" }
-  writing: { kind: "projects", title: "World Building", intro: "In my spare time I love to work on worlds I have been building for more than six years: creating interesting characters and their backstories, the world and planet they live in, and monsters that could exist out of <i>Roadside Picnic</i>. I'm also trying to get better at dialogue, so I practice from time to time.", projects: [ sandstorm, penumbra, grimoire ] },
+  writing: { kind: "projects", title: "World Building", intro: "In my spare time I love to work on worlds I have been building for more than six years: creating interesting characters and their backstories, the world and planet they live in, and monsters that could exist out of <i>Roadside Picnic</i>. I'm also trying to get better at dialogue, so I practice from time to time.", projects: [ penumbra, sandstorm, grimoire ] },
   games:   { kind: "projects", title: "Game Design", intro: "These are my top three games, the ones I poured myself into.<br>I love spending hours on design, inventing new mechanics that are tied to the story, so that gameplay and narrative reinforce each other and elevate the whole experience.", projects: [ sevenDays, breadyOrNot, pitOut ] },
   threed:  { kind: "projects", title: "3D",          intro: "I create models, environments and props.<br>For everything I create, there has to be a story behind it.", projects: [ roboCoach, skyWindmill, desk ] },
   // Other kinds you can attach to a hotspot later:
@@ -823,7 +823,7 @@ for (const ev of ["play", "pause", "ended"]) inner.addEventListener(ev, e => {
 const ABOUT = {
   intro: [
     { t: "Hi!" },
-    { t: "I'm Ignacio. A future Game Designer." },
+    { t: "I'm Ignacio. A Game Designer." },
     { t: "This is my About Me section, where you can learn a little about me.", pose: "chill" },
   ],
   ask: { t: "Is there anything that you want to know?", pose: "question" },
@@ -973,7 +973,9 @@ backdrop.addEventListener("click", e => { if (e.target === backdrop) closeWindow
 // --- edit mode ---
 let editing = false, selected = null;
 const r1 = v => Math.round(v * 10) / 10;
+const EDIT_MODE_ENABLED = false;   // the E key (hitbox editor) is switched off for visitors; set to true while you adjust the hotspots
 function toggleEdit(){
+  if (!EDIT_MODE_ENABLED) return;
   editing = !editing; document.body.classList.toggle("editing", editing);
   if (!editing && selected){ els[selected.id].classList.remove("selected"); selected = null; }
   if (editing){ buildTable(); printOut(); }
