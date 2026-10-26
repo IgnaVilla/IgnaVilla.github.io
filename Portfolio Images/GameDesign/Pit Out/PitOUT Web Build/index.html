@@ -6,6 +6,7 @@
     <title>Unity Web Player | ExplotionControl</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <style>html, body { height: 100%; background: #231F20 } #unity-container.unity-desktop { left: 0; top: 0; transform: none; width: 100%; height: 100% } #unity-canvas { width: 100% !important; height: calc(100% - 38px) !important; display: block } #unity-footer { color: #fff }</style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -55,9 +56,9 @@
       var loaderUrl = buildUrl + "/Web Build.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Web Build.data.br",
-        frameworkUrl: buildUrl + "/Web Build.framework.js.br",
-        codeUrl: buildUrl + "/Web Build.wasm.br",
+        dataUrl: buildUrl + "/Web Build.data",
+        frameworkUrl: buildUrl + "/Web Build.framework.js",
+        codeUrl: buildUrl + "/Web Build.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "ExplotionControl",

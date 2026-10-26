@@ -186,6 +186,14 @@ body.locked{ overflow:hidden; }
 .lb-count{ position:absolute; bottom:clamp(8px,2vh,22px); left:50%; transform:translateX(-50%); padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; font-weight:500; }
 .lightbox img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
 .panel video.gif{ width:100%; border-radius:10px; display:block; background:#000; }
+.game{ position:relative; aspect-ratio:16/10; border-radius:10px; overflow:hidden; background:#231F20; }
+.game iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.game-play{ position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:#000; cursor:pointer; }
+.game-play img{ width:100%; height:100%; object-fit:cover; display:block; opacity:.75; transition:opacity .2s; }
+.game-play:hover img, .game-play:focus-visible img{ opacity:1; }
+.game-btn{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:.7em 1.6em; border-radius:999px; background:#E0243B; color:#fff; font:inherit; font-weight:600; font-size:1.25em; box-shadow:0 6px 24px rgba(0,0,0,.5); }
+.game-note{ margin:.5em 0 0 !important; font-size:14px !important; color:var(--panel-muted); text-align:center; max-width:none !important; }
+.game-note a{ color:inherit; }
 .vbox{ position:relative; }
 .vbox video{ display:block; width:100%; }
 .vbox .vhit{ position:absolute; left:0; right:0; top:0; bottom:56px; z-index:1; cursor:pointer; }       /* the whole picture is a play / pause button; the bar below keeps its own controls */
@@ -510,9 +518,10 @@ const pitOut = {
   title: "PitOut",
   summary: "A 2D platformer about climbing out of a pit: blast yourself upward with explosions, pull yourself up the walls, and choose how hard your own climb will be.",
   thumb: { video: encodeURI(GP + "Gameplay Trailer.mp4"), poster: encodeURI(GP + "poster.webp") },
+  lead:  { game: encodeURI(GP + "PitOUT Web Build/index.html"), poster: encodeURI(GP + "poster.webp") },   // the playable build; the trailer still plays on the card
   card:  { image: encodeURI(GP + "image3.webp") },
   meta: { Genre: "2D platformer", "Inspired by": "Celeste, Getting Over It", Format: "Prototype + Game Design Document" },
-  before: [ "<b>The goal.</b> The goal of this project was to create a simple but original new mechanic: an explosion that you control with your mouse. From there I kept adding supporting systems to empower it, like wall climbing, ambient explosions and the checkpoint placer." ],
+  before: [ "<b>The goal.</b> The goal of this project was to create a simple but original new mechanic in a week: an explosion that you control with your mouse. From there I kept adding supporting systems to empower it, like wall climbing, ambient explosions and the checkpoint placer." ],
   details: [
     "<b>The idea.</b> PitOut is a journey that feels like a never-ending pit. You start at rock bottom, and every time you get through one challenge, a new one appears. Think of the technical platforming of Celeste with the long journey of Getting Over It.",
     "<b>Main mechanic: the explosion.</b><br>I wanted to explore an interesting way of using the mouse in a 2D platformer: intuitive to use, hard to master. The position of the mouse sets the center of the explosion, and the distance and position of the player relative to it determine how far they will go. The game feel turned out so good that testers started juggling the player in the air just for fun.",
@@ -522,9 +531,7 @@ const pitOut = {
     "<b>Secondary mechanic: the checkpoint placer.</b><br>To add more challenge, I realized that a normal checkpoint system, where the checkpoints are already placed by the level designer, wouldn't work. All of the mechanics, even the level design, were thought to give the player the power to choose their own difficulty. That's why I opted for a \u201cplacer.\u201d",
     "The player places checkpoints wherever and whenever they want, but only a limited amount. This not only fits the other systems and the philosophy of the game, it also adds stress and resource management: the player has to decide whether to use a limited checkpoint before a difficult challenge or save it for later. The longer you wait, the higher the fall.",
     { loop: encodeURI(GP + "PitOut Saving System.mp4"), size: "half" },
-    "<b>Weight and stamina.</b> I tried a heavier, more robust movement, with more impact frames on landing and slower motion, but testers found it boring and too slow. Now I want to create the illusion of weight with animation while keeping the same velocity. Standing still doesn't spend stamina, so you always have time to aim or rethink your path.",
-    "<b>Level design.</b><br>Each level is a long vertical climb made of connected platforming challenges. No path is the wrong path, only harder or easier. At the end of each level there is a place to rest, like a village or a view, and then you choose which route to take next, sometimes without knowing if it is a good or a bad decision. Hidden paths and villages reward exploration, and light, sound and visual clues guide you to characters, minigames and story so nothing feels random. The sketch shows how a section combines jumps, climbs and explosions.",
-    { image: encodeURI(GP + "image4.webp") },
+    { text: "<b>Level design.</b><br>Each level is a long vertical climb made of connected platforming challenges. No path is the wrong path, only harder or easier. At the end of each level there is a place to rest, like a village or a view, and then you choose which route to take next, sometimes without knowing if it is a good or a bad decision. Hidden paths and villages reward exploration, and light, sound and visual clues guide you to characters, minigames and story so nothing feels random. The sketch shows how a section combines jumps, climbs and explosions.", image: encodeURI(GP + "image4.webp") },
     { text: "<b>Progression.</b> Each level is built like a funnel: several routes at the top that merge into rest points and then branch again, so you are always choosing a path. Side areas and hidden villages reward exploring, and every level introduces one new system, taught step by step, so the challenge grows while you learn.", image: encodeURI(GP + "image5.webp") },
     "<b>Difficulty is a choice.</b> When I designed this game, my rule was that the player always has more than one path: if you get stuck, you can look for an easier route or push through the hard one, so frustration becomes almost a decision and beating a tough section feels earned. The difficulty then rises in three stages: the fall starts safe and ramps up fast, the climb keeps challenging you instead of letting your skills catch up, and the summit looks impossible but feels easier thanks to how far you have come. The hard part is making beginners and experts coexist on the same map.",
   ],
@@ -638,7 +645,7 @@ const grimoire = {
     "From time to time, I like to add new pages to my Grimoire. When I create these monsters or anomalies, I already think of them with a game design mindset, as if they were monsters you could find not only in Stalker, but also in Roadside Picnic.",
     "You will be able to see some of the pages where I try to create new original creatures, weapons and supernatural occurrences. The pages were originally written in Spanish and are translated here, but I would love to talk about them all.",
   ],
-  media: nums(13).map(n => ({ image: encodeURI(GW + `Grimoire/grimoire${n}.webp`) })),
+  media: ["01", "07", "10", "03", "09", "12", "05", "06", "04", "13", "11", "02", "08"].map(n => ({ image: encodeURI(GW + `Grimoire/grimoire${n}.webp`) })),
 };
 
 const content = {
@@ -732,6 +739,7 @@ for (const h of hotspots){
 // --- windows ---
 function mediaHTML(m, alt){
   if (m.video) return `<div class="vbox"><video class="video" controls playsinline preload="none"${m.poster ? ` poster="${m.poster}"` : ""} src="${m.video}"></video><span class="vhit"></span><span class="vplay"></span></div>`;
+  if (m.game) return `<div class="game"><button type="button" class="game-play" data-game="${m.game}" aria-label="Play ${alt} here"><img src="${m.poster}" alt=""><span class="game-btn">&#9654; Play it here</span></button></div><p class="game-note">Made for a computer: mouse and keyboard. <a href="${m.game}" target="_blank" rel="noopener">Open it in its own tab</a>.</p>`;
   if (m.loop) return `<video class="gif" src="${m.loop}" autoplay loop muted playsinline preload="auto" disablepictureinpicture aria-label="${alt}"></video>`;   // plays by itself, like a GIF
   if (m.iframe) return `<div class="embed"><iframe src="${m.iframe}" title="${m.title || alt}" allowfullscreen loading="lazy"></iframe></div>`;
   if (m.youtube !== undefined) return m.youtube
@@ -844,6 +852,11 @@ function lbShow(i){
   }
   document.getElementById("lbCount").textContent = `${lbIndex + 1} / ${lbImages.length}`;
 }
+inner.addEventListener("click", e => {          // the playable build starts only when asked
+  const b = e.target.closest(".game-play"); if (!b) return;
+  const f = document.createElement("iframe"); f.src = b.dataset.game; f.title = "PitOut"; f.allow = "fullscreen; autoplay; gamepad"; f.allowFullscreen = true;
+  b.parentNode.replaceChildren(f); f.focus();
+});
 inner.addEventListener("click", e => {
   const img = e.target.closest(".lead img, .media img, .strip img"); if (!img) return;
   lbImages = [...inner.querySelectorAll(".lead img, .media img, .strip img")]; lbIndex = lbImages.indexOf(img);
