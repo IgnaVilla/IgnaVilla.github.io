@@ -494,6 +494,8 @@ const sevenDays = {
   summary: "A dialogue prototype where choosing what to say isn't enough: you have to survive inside the character's mind to get the outcome you picked.",
   thumb: { video: encodeURI(G7 + "7DaysVideo.mp4"), poster: encodeURI(G7 + "7DaysPoster.webp") },
   card:  { image: encodeURI(G7 + "7DaysImage3.webp") },        // box picture; the video plays on hover
+  leadSize: "small",
+  afterLead: [ { game: encodeURI(G7 + "7 Days Web Build/index.html"), poster: encodeURI(G7 + "7DaysImage3.webp") } ],   // the playable build, right under the video
   meta: { Type: "Prototype", Engine: "Unity", "Narrative tool": "Articy:Draft 3" },
   // details: text (HTML allowed) or { image } shown in the order written here.
   details: [
@@ -774,6 +776,7 @@ function projectHTML(p){
     <p class="summary">${p.summary}</p>
     ${(p.before || []).map(t => `<p>${titled(t)}</p>`).join("")}
     <div class="lead${p.leadSize === "small" ? " small" : ""}">${mediaHTML(p.lead || p.thumb || { image: "" }, p.title)}</div>
+    ${(p.afterLead || []).map(m => mediaHTML(m, p.title)).join("")}
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
     ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
     ${(p.details || []).map(t => typeof t === "string" ? `<p>${titled(t)}</p>`
