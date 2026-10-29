@@ -161,6 +161,7 @@ body.locked{ overflow:hidden; }
 }
 .panel p{ margin:0 0 14px; max-width:68ch; font-size:17px; }
 .panel .detail p{ font-size:19px; }
+.panel .detail p a{ color:var(--title); font-weight:500; }
 .panel .detail p:has(> b:first-child){ margin-top:2em; }
 .panel .detail p > b:first-child{ font-size:1.22em; display:inline-block; padding-bottom:.1em; margin-bottom:.45em; border-bottom:2px solid var(--title); }   /* the little title of each section, with a line under it */
 .panel .meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px 20px; margin:0 0 18px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--panel-ink) 6%,transparent); font-size:15px; }
@@ -186,6 +187,8 @@ body.locked{ overflow:hidden; }
 .lb-count{ position:absolute; bottom:clamp(8px,2vh,22px); left:50%; transform:translateX(-50%); padding:3px 12px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; font-weight:500; }
 .lightbox img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
 .panel video.gif{ width:100%; border-radius:10px; display:block; background:#000; }
+.panel .media .embed{ aspect-ratio:16/9; }
+.panel .media .embed iframe{ width:100%; height:100%; border:0; border-radius:10px; background:#fff; display:block; }
 .game{ position:relative; aspect-ratio:16/10; border-radius:10px; overflow:hidden; background:#231F20; }
 .game iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 .game-play{ position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:#000; cursor:pointer; }
@@ -511,6 +514,8 @@ const sevenDays = {
     { image: encodeURI(G7 + "7DaysImage2.webp") },
     "<b>More.</b> Obviously, this is just the tip of the iceberg. I have SO MUCH more to talk about, so if you are interested, just ask me about it. I'm always super excited to talk about this passion project of mine.",
     "Right now I'm working with an incredible team to make this possible. I will update this page on December 15.",
+    "If you want a little preview of what we are doing right now, check out our <a href=\"https://miro.com/app/board/uXjVHBHhyZU=/?share_link_id=728127241735\" target=\"_blank\" rel=\"noopener\">Miro board</a>:",
+    { iframe: "https://miro.com/app/live-embed/uXjVHBHhyZU=/?embedAutoplay=true", title: "7 Days board on Miro" },
   ],
   links: [ { label: "itch.io", url: "https://ignavilla.itch.io/unreachedpeak" } ],
 };
@@ -748,7 +753,10 @@ for (const h of hotspots){
 // --- windows ---
 function mediaHTML(m, alt){
   if (m.video) return `<div class="vbox"><video class="video" controls playsinline preload="none"${m.poster ? ` poster="${m.poster}"` : ""} src="${m.video}"></video><span class="vhit"></span><span class="vplay"></span></div>`;
-  if (m.sketchfab) return mediaHTML({ game: `https://sketchfab.com/models/${m.sketchfab}/embed?autostart=1&ui_theme=dark`, poster: m.poster, note: "Drag to turn the model around." }, alt);
+  if (m.sketchfab){                                                                  // the 3D preview is already there from the start
+    const u = `https://sketchfab.com/models/${m.sketchfab}/embed?autostart=1&ui_theme=dark`;
+    return `<div class="game"><iframe src="${u}" title="${alt} in 3D" loading="lazy" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe></div><p class="game-note">Drag to turn the model around. <a href="https://sketchfab.com/3d-models/${m.sketchfab}" target="_blank" rel="noopener">Open it in its own tab</a>.</p>`;
+  }
   if (m.game) return `<div class="game"><button type="button" class="game-play" data-game="${m.game}" aria-label="Play ${alt} here"><img src="${m.poster}" alt=""><span class="game-btn">&#9654; Play it here</span></button></div><p class="game-note">${m.note || "Made for a computer: mouse and keyboard."} <a href="${m.game}" target="_blank" rel="noopener">Open it in its own tab</a>.</p>`;
   if (m.loop) return `<video class="gif" src="${m.loop}" autoplay loop muted playsinline preload="auto" disablepictureinpicture aria-label="${alt}"></video>`;   // plays by itself, like a GIF
   if (m.iframe) return `<div class="embed"><iframe src="${m.iframe}" title="${m.title || alt}" allowfullscreen loading="lazy"></iframe></div>`;
