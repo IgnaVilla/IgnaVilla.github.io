@@ -588,6 +588,10 @@ const desk = {
   summary: "A Frost Ogre's workshop, where he sculpts the human he loves again and again, because it is never perfect.",
   thumb: { image: encodeURI(G3 + "Desk/desk2.webp"), full: encodeURI(G3 + "Desk/desk2-full.webp") },
   meta: { Modeling: "Blender", Texturing: "Substance Painter", Lighting: "Unity" },
+  // Sketchfab preview, right under the top picture: it appears as soon as the model's id (the long code at the end of its Sketchfab address) is written here.
+  afterLead: [ { sketchfab: "", poster: encodeURI(G3 + "Desk/desk2.webp") } ].filter(m => m.sketchfab),
+  linksLabel: "YOU CAN SEE IT IN 3D ON",
+  links: [ { label: "Sketchfab", url: "https://skfb.ly/pPIuX" } ],
   details: [
     "<b>The story.</b> In the mountains lives a Frost Ogre who is in love with a human. He knows he can never be with her, but her beauty is so overwhelming that he can't stop sculpting her again and again. No matter how many times he carves her, he has to start over, because it is never perfect.",
   ],
@@ -741,7 +745,8 @@ for (const h of hotspots){
 // --- windows ---
 function mediaHTML(m, alt){
   if (m.video) return `<div class="vbox"><video class="video" controls playsinline preload="none"${m.poster ? ` poster="${m.poster}"` : ""} src="${m.video}"></video><span class="vhit"></span><span class="vplay"></span></div>`;
-  if (m.game) return `<div class="game"><button type="button" class="game-play" data-game="${m.game}" aria-label="Play ${alt} here"><img src="${m.poster}" alt=""><span class="game-btn">&#9654; Play it here</span></button></div><p class="game-note">Made for a computer: mouse and keyboard. <a href="${m.game}" target="_blank" rel="noopener">Open it in its own tab</a>.</p>`;
+  if (m.sketchfab) return mediaHTML({ game: `https://sketchfab.com/models/${m.sketchfab}/embed?autostart=1&ui_theme=dark`, poster: m.poster, note: "Drag to turn the model around." }, alt);
+  if (m.game) return `<div class="game"><button type="button" class="game-play" data-game="${m.game}" aria-label="Play ${alt} here"><img src="${m.poster}" alt=""><span class="game-btn">&#9654; Play it here</span></button></div><p class="game-note">${m.note || "Made for a computer: mouse and keyboard."} <a href="${m.game}" target="_blank" rel="noopener">Open it in its own tab</a>.</p>`;
   if (m.loop) return `<video class="gif" src="${m.loop}" autoplay loop muted playsinline preload="auto" disablepictureinpicture aria-label="${alt}"></video>`;   // plays by itself, like a GIF
   if (m.iframe) return `<div class="embed"><iframe src="${m.iframe}" title="${m.title || alt}" allowfullscreen loading="lazy"></iframe></div>`;
   if (m.youtube !== undefined) return m.youtube
@@ -778,7 +783,7 @@ function projectHTML(p){
     <div class="lead${p.leadSize === "small" ? " small" : ""}">${mediaHTML(p.lead || p.thumb || { image: "" }, p.title)}</div>
     ${(p.afterLead || []).map(m => mediaHTML(m, p.title)).join("")}
     ${Object.keys(p.meta || {}).length ? `<div class="meta">${Object.entries(p.meta).map(([k,v]) => `<div><b>${k}</b>${v}</div>`).join("")}</div>` : ""}
-    ${(p.links || []).length ? `<div class="links"><span class="links-label">YOU CAN PLAY IT ON</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
+    ${(p.links || []).length ? `<div class="links"><span class="links-label">${p.linksLabel || "YOU CAN PLAY IT ON"}</span>${p.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}</div>` : ""}
     ${(p.details || []).map(t => typeof t === "string" ? `<p>${titled(t)}</p>`
       : t.strip ? `<div class="strip-wrap"><div class="strip">${t.strip.map(m => mediaHTML(typeof m === "string" ? { image: m } : m, p.title)).join("")}</div><button type="button" class="strip-btn prev" hidden aria-label="Previous pictures"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M44 6 L18 32 L44 58"/></svg></button><button type="button" class="strip-btn next" aria-label="More pictures"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 6 L46 32 L20 58"/></svg></button></div>`
       : t.text ? `<div class="media figure split"><p>${titled(t.text)}</p><div>${mediaHTML(t, p.title + " screenshot")}</div></div>`
